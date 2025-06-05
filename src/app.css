@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+@layer base {
+	html,
+	body,
+	#content {
+		@apply min-h-screen w-full;
+	}
+
+	body {
+		@apply bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white;
+	}
+
+	.control-group {
+		@apply flex;
+		& > * {
+			@apply shrink-0;
+			&:not(:first-child) {
+				@apply rounded-s-none;
+			}
+			&:not(:last-child) {
+				@apply rounded-e-none;
+			}
+		}
+	}
+
+	#lobby {
+		@apply flex min-h-screen flex-col;
+		& > header {
+			@apply flex shrink-0 items-center justify-start space-x-4 p-4;
+		}
+		& > main {
+			@apply flex flex-1 items-center justify-center space-x-8;
+			& > div {
+				@apply flex items-center justify-center space-x-4;
+			}
+		}
+		& > footer {
+			@apply grid grid-cols-3 gap-x-4 p-4;
+			& > div {
+				@apply flex items-center justify-center;
+			}
+		}
+	}
+}

@@ -1,0 +1,8 @@
+@reference "$lib/../app.css";
+
+.chat {
+	@apply relative w-96;
+	& > menu {
+		@apply absolute bottom-10 left-0 flex h-64 w-full flex-col justify-end overflow-y-auto rounded-sm border border-gray-700 bg-gray-800 p-1;
+	}
+}

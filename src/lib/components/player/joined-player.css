@@ -1,0 +1,8 @@
+@reference "$lib/../app.css";
+
+.joined-player {
+	@apply relative flex h-72 w-64 flex-col items-center justify-center space-y-4 rounded-xl border border-gray-700 bg-gray-800 p-4;
+	& > .button-kick-player {
+		@apply absolute top-2 right-2;
+	}
+}

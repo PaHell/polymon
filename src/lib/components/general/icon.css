@@ -1,0 +1,6 @@
+@reference "$lib/../app.css";
+@import 'remixicon/fonts/remixicon.css';
+
+.icon {
+	@apply text-[1.5rem] leading-none;
+}
