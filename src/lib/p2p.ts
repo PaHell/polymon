@@ -3,7 +3,6 @@ import { Peer, type DataConnection } from "peerjs";
 import { writable, get } from "svelte/store";
 
 export const username = writable<string | undefined>(undefined);
-export const peerIdentities = writable<Record<string, string>>({});
 
 type P2PMessage =
       | { type: 'request'; id: string; action: string; payload?: unknown }
@@ -12,11 +11,23 @@ type P2PMessage =
 
 const RESPONSE_TIMEOUT = 5000;
 
+export type P2P = {
+      isHost: boolean;
+      connectedLobbyCode: string | undefined;
+      peer: Peer | null;
+      connections: DataConnection[];
+      identities: Record<string, string>;
+}
+
 export const p2p = function () {
-      let isHost = false;
-      let peer: Peer | null = null;
-      let connections: DataConnection[] = [];
-      const { subscribe } = writable<unknown>();
+      const store = writable<P2P>({
+            isHost: false,
+            connectedLobbyCode: undefined,
+            peer: null,
+            connections: [],
+            identities: {}
+      });
+      const { subscribe, update } = store;
 
       const pendingRequests = new Map<
             string,
@@ -77,106 +88,145 @@ export const p2p = function () {
       return {
             subscribe,
 
-            getPeerId: () => peer?.id,
-            isHost: () => isHost,
-
             connectToBroker: (code?: string) => {
                   return new Promise((resolve, reject) => {
-                        if (peer) peer.destroy();
-                        peer = code ? new Peer(PUBLIC_P2P_PREFIX + code) : new Peer();
-                        peer.on('open', id => {
-                              console.log('Connected to broker:', id);
-                              resolve(id);
+                        update((state) => {
+                              if (state.peer) state.peer.destroy();
+                              state.peer = code ? new Peer(PUBLIC_P2P_PREFIX + code) : new Peer();
+                              state.peer.on('open', id => {
+                                    update((state2) => {
+                                          console.log('Connected to broker:', id);
+                                          state2.connectedLobbyCode = code;
+                                          resolve(id);
+                                          return state2;
+                                    });
+                              });
+                              state.peer.on('error', reject);
+                              return state;
                         });
-                        peer.on('error', reject);
                   });
             },
 
             connectToPeer: (code: string) => {
+                  const _state = get(store);
                   return new Promise((resolve, reject) => {
-                        if (!peer) throw new Error('Peer not initialized');
-                        const conn = peer.connect(PUBLIC_P2P_PREFIX + code);
+                        if (!_state.peer) throw new Error('Peer not initialized');
+                        const conn = _state.peer.connect(PUBLIC_P2P_PREFIX + code);
                         conn.on('open', () => {
-                              console.log('Connected to host:', conn);
-                              isHost = false;
-                              connections.push(conn);
-                              sendIdentify(conn);
-                              resolve(true);
+                              update((state) => {
+                                    console.log('Connected to host:', conn);
+                                    state.isHost = false;
+                                    state.connectedLobbyCode = code;
+                                    state.connections.push(conn);
+                                    sendIdentify(conn);
+                                    resolve(true);
+                                    return state;
+                              });
                         });
                         conn.on('data', (data) => handleIncomingMessage(conn, data as P2PMessage));
                         conn.on('error', reject);
                         conn.on('close', () => {
                               console.log('Connection closed:', conn.peer);
-                              peerIdentities.update(map => {
-                                    delete map[conn.peer];
-                                    return { ...map };
+                              update((state) => {
+                                    delete state.identities[conn.peer];
+                                    state.connections = state.connections.filter(c => c !== conn);
+                                    state.connectedLobbyCode = undefined;
+                                    return state;
                               });
-                              connections = connections.filter(c => c !== conn);
                         });
 
-                        peerIdentities.set({
-                              [peer.id]: get(username) || 'You'
+                        update((state) => {
+                              if (!state.peer) throw new Error('Peer not initialized');
+                              state.identities[state.peer.id] = get(username) || 'You'
+                              return state;
                         });
 
                         // Handle incoming identity payloads
                         p2p.registerHandler<string, void>('identify', async (name, conn) => {
-                              peerIdentities.update(map => ({ ...map, [conn]: name }));
+                              update((state) => {
+                                    state.identities[conn] = name;
+                                    return state;
+                              });
                         });
                   });
             },
 
             listenForConnections: () => {
-                  if (!peer) throw new Error('Peer not initialized');
-                  isHost = true;
-                  peer.on('connection', (conn) => {
-                        console.log('New connection from:', conn.peer);
-                        connections.push(conn);
-                        conn.on('data', (data) => handleIncomingMessage(conn, data as P2PMessage));
-                        conn.on('open', () => sendIdentify(conn));
-                        conn.on('close', () => {
-                              console.log('Connection closed:', conn.peer);
-                              peerIdentities.update(map => {
-                                    delete map[conn.peer];
-                                    return { ...map };
+                  update((state) => {
+                        if (!state.peer) throw new Error('Peer not initialized');
+                        state.isHost = true;
+                        state.peer.on('connection', (conn) => {
+                              update((state) => {
+                                    console.log('New connection from:', conn.peer);
+                                    state.connections.push(conn);
+                                    conn.on('data', (data) => handleIncomingMessage(conn, data as P2PMessage));
+                                    conn.on('open', () => sendIdentify(conn));
+                                    conn.on('close', () => {
+                                          console.log('Connection closed:', conn.peer);
+                                          delete state.identities[conn.peer];
+                                          state.connections = state.connections.filter(c => c !== conn);
+                                    });
+                                    return state;
                               });
-                              connections = connections.filter(c => c !== conn);
                         });
+                        state.identities[state.peer.id] = get(username) || 'You'
+                        return state;
                   });
 
-                  peerIdentities.set({
-                        [peer.id]: get(username) || 'You'
-                  });
 
                   // Handle incoming identity payloads
                   p2p.registerHandler<string, void>('identify', async (name, conn) => {
-                        peerIdentities.update(map => ({ ...map, [conn]: name }));
+                        update((state) => {
+                              state.identities[conn] = name;
+                              return state;
+                        });
                   });
             },
 
-            disconnect: () => {
-                  connections.forEach(conn => {
-                        conn.removeAllListeners();
-                        conn.close();
+            disconnectAll: () => {
+                  update((state) => {
+                        state.connections.forEach(conn => {
+                              conn.removeAllListeners();
+                              conn.close();
+                        });
+                        state.connections = [];
+                        if (state.peer) {
+                              state.peer.removeAllListeners();
+                              state.peer.destroy();
+                              state.peer = null;
+                        }
+                        pendingRequests.clear();
+                        state.identities = {};
+                        state.connectedLobbyCode = undefined;
+                        return state;
                   });
-                  connections = [];
-                  if (peer) {
-                        peer.removeAllListeners();
-                        peer.destroy();
-                        peer = null;
-                  }
-                  pendingRequests.clear();
-                  peerIdentities.set({});
             },
 
-            sendRequest: function <In, Out>(action: string, payload?: In): Promise<Out> {
-                  if (!connections.length || !peer) throw new Error('No active connection');
+            disconnectFromPeer: (connectionId: string) => {
+                  update((state) => {
+                        const conn = state.connections.find(c => c.connectionId === connectionId);
+                        if (conn) {
+                              conn.removeAllListeners();
+                              conn.close();
+                              state.connections = state.connections.filter(c => c !== conn);
+                              delete state.identities[connectionId];
+                        }
+                        return state;
+                  });
+            },
+
+            sendRequest: function <In, Out>(action: string, connectionId: string, payload?: In): Promise<Out> {
+                  const state = get(store);
+                  if (!state.connections.length || !state.peer) throw new Error('No active connection');
+                  const conn = state.connections.find(c => c.connectionId === connectionId);
+                  if (!conn) throw new Error(`Connection with ID ${connectionId} not found`);
                   const id = crypto.randomUUID();
                   const message: P2PMessage = { type: 'request', id, action, payload };
 
                   // self handle request
                   const handler = requestHandlers.get(action);
                   if (handler) {
-                        handler(payload, peer.id);
+                        handler(payload, state.peer.id);
                   }
 
                   return new Promise((resolve, reject) => {
@@ -186,23 +236,24 @@ export const p2p = function () {
                         }, RESPONSE_TIMEOUT);
 
                         pendingRequests.set(id, { resolve, reject, timeout });
-                        connections[0].send(message);
+                        conn.send(message);
                   });
             },
 
             broadcastRequest: function <In, Out>(action: string, payload?: In): Promise<Out[]> {
-                  if (!connections.length || !peer) throw new Error('No active connections');
+                  const state = get(store);
+                  if (!state.connections.length || !state.peer) throw new Error('No active connections');
                   const id = crypto.randomUUID();
                   const message: P2PMessage = { type: 'request', id, action, payload };
 
                   // self handle request
                   const handler = requestHandlers.get(action);
                   if (handler) {
-                        handler(payload, peer.id);
+                        handler(payload, state.peer.id);
                   }
 
                   return Promise.allSettled(
-                        connections.map(conn => {
+                        state.connections.map(conn => {
                               return new Promise<Out>((resolve, reject) => {
                                     const reqId = crypto.randomUUID();
                                     const msg = { ...message, id: reqId };

@@ -4,7 +4,7 @@
 	import Button from '../general/Button.svelte';
 	import Input from '../general/Input.svelte';
 	import Icon, { icons } from '../general/Icon.svelte';
-	import { p2p, peerIdentities } from '$lib/p2p';
+	import { p2p } from '$lib/p2p';
 	import Select from '../general/Select.svelte';
 	import { figures } from '$lib';
 
@@ -26,7 +26,7 @@
 </script>
 
 <div {...others} class="joined-player {others.class ?? ''}">
-	{#if p2p.isHost()}
+	{#if $p2p.isHost}
 		<Button
 			variant="secondary"
 			icon={icons.close}

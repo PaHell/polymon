@@ -1,0 +1,36 @@
+@reference "$lib/../app.css";
+
+.modal-container {
+	@apply fixed inset-0 z-40 flex items-center justify-center bg-black/50;
+}
+.modal {
+	@apply rounded border border-gray-700 bg-gray-800;
+
+	&.modal-dialog {
+		@apply w-full max-w-lg;
+	}
+
+	&.modal-default {
+		@apply w-full max-w-2xl;
+	}
+
+	&.modal-fullscreen {
+		@apply h-[90%] w-[90%];
+	}
+
+	& > header {
+		@apply flex flex-col border-b border-gray-700;
+		& > div {
+			@apply flex items-center justify-between p-4;
+		}
+	}
+	& > main {
+		@apply p-4;
+	}
+	& > footer {
+		@apply flex items-center justify-end p-4;
+		& > button {
+			@apply ml-2;
+		}
+	}
+}

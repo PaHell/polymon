@@ -2,5 +2,5 @@
 @import 'remixicon/fonts/remixicon.css';
 
 .icon {
-	@apply text-[1.5rem] leading-none;
+	@apply shrink-0 text-[1.5rem] leading-none;
 }

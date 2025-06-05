@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { peerIdentities } from '$lib/p2p';
+	import { p2p } from '$lib/p2p';
 	import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 
 	let {
@@ -13,6 +13,6 @@
 </script>
 
 <p {...others} class="message {others.class ?? ''}">
-	<span class="opacity-50">[{$peerIdentities[userId]}]:</span>
+	<span class="opacity-50">[{$p2p.identities[userId]}]:</span>
 	<span>{message}</span>
 </p>

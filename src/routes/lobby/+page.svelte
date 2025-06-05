@@ -4,14 +4,14 @@
 	import Chat from '$lib/components/chat/Chat.svelte';
 	import Button from '$lib/components/general/Button.svelte';
 	import Checkbox from '$lib/components/general/Checkbox.svelte';
+	import Dialog from '$lib/components/general/Dialog.svelte';
 	import { icons } from '$lib/components/general/Icon.svelte';
 	import Input from '$lib/components/general/Input.svelte';
 	import Bot from '$lib/components/player/Bot.svelte';
 	import JoinedPlayer from '$lib/components/player/JoinedPlayer.svelte';
-	import { p2p, peerIdentities, username } from '$lib/p2p';
+	import { p2p, username } from '$lib/p2p';
 
 	const MAX_PLAYERS = 5;
-	let lobbyCode = $state('1234-5678');
 	let isReady = $state(false);
 	let chatMessages: {
 		userId: string;
@@ -21,8 +21,15 @@
 
 	let players: App.Data.Player[] = $state([]);
 	let bots: App.Data.Bot[] = $state([]);
+	let kickDialogOpened = $state(false);
+	let youGotKickedDialogOpened = $state(false);
+	let kickPlayerId: string | undefined = $state();
 
-	peerIdentities.subscribe((identities) => {
+	p2p.subscribe(({ connectedLobbyCode, identities }) => {
+		if (!connectedLobbyCode) {
+			youGotKickedDialogOpened = true;
+			return;
+		}
 		players = [
 			...Object.entries(identities).map(([id, name]) => ({
 				id,
@@ -44,7 +51,7 @@
 
 	function copyLobbyCode() {
 		navigator.clipboard
-			.writeText(lobbyCode)
+			.writeText($p2p.connectedLobbyCode ?? '')
 			.then(() => {})
 			.catch((err) => {
 				console.error('Failed to copy: ', err);
@@ -86,8 +93,41 @@
 		chatValue = '';
 		console.log(`Chat message sent: ${value} -> ${response}`);
 	}
+
+	function onKickPlayerConfirm() {
+		if (!kickPlayerId) return;
+		console.log(`Kicking player: ${kickPlayerId}`);
+		p2p.disconnectFromPeer(kickPlayerId);
+		kickDialogOpened = false;
+		kickPlayerId = undefined;
+	}
 </script>
 
+<Dialog
+	bind:opened={kickDialogOpened}
+	title="Kick Player '{kickPlayerId ? $p2p.identities[kickPlayerId] : 'Unknown'}'"
+	primary="Remove"
+	secondary="Keep"
+	onPrimary={onKickPlayerConfirm}
+	onSecondary={() => (kickDialogOpened = false)}
+>
+	{#snippet body()}
+		<p>Are you sure you want to remove this player?</p>
+	{/snippet}
+</Dialog>
+<Dialog
+	bind:opened={youGotKickedDialogOpened}
+	title="You got kicked"
+	primary="Ok"
+	onPrimary={() => {
+		youGotKickedDialogOpened = false;
+		goto('/start');
+	}}
+>
+	{#snippet body()}
+		<p>You have been removed from the lobby.</p>
+	{/snippet}
+</Dialog>
 <div id="lobby">
 	<header>
 		<Button variant="secondary" icon={icons.back} onclick={leaveLobby}>Leave</Button>
@@ -96,9 +136,9 @@
 				icon={icons.code}
 				label="Lobby Code"
 				hideLabel
-				bind:value={lobbyCode}
-				name="query"
+				value={$p2p.connectedLobbyCode}
 				class="flex-1"
+				readonly
 			/>
 			<Button variant="secondary" icon="clipboard" onclick={copyLobbyCode}>Copy</Button>
 		</div>
@@ -106,7 +146,13 @@
 	<main>
 		<div>
 			{#each players as player (player.id)}
-				<JoinedPlayer {...player} />
+				<JoinedPlayer
+					{...player}
+					onKick={() => {
+						kickPlayerId = player.id;
+						kickDialogOpened = true;
+					}}
+				/>
 			{/each}
 			{#each bots as bot (bot.id)}
 				<Bot {...bot} onremove={() => onRemoveBot(bot.id)} />
