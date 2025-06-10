@@ -42,4 +42,39 @@
 			}
 		}
 	}
+
+	#game {
+		@apply h-screen w-screen p-8;
+	}
+
+	#gameboard {
+		@apply m-auto grid aspect-square max-h-full max-w-full border-2;
+		grid-template-columns: min(10vw, 10vh) repeat(9, 1fr) min(10vw, 10vh);
+		grid-template-rows: min(10vw, 10vh) repeat(9, 1fr) min(10vw, 10vh);
+		grid-template-areas:
+			'f1  f2  f3  f4  f5  f6  f7  f8  f9 f10 f11'
+			'f40  .   .   .   .   .   .   .   .   .  f12'
+			'f39  .  f41  .   .   .   .   .   .   .  f13'
+			'f38  .   .   .   .   .   .   .   .   .  f14'
+			'f37  .   .   .   .   .   .   .   .   .  f15'
+			'f36  .   .   .   .  f43  .   .   .   .  f16'
+			'f35  .   .   .   .   .   .   .   .   .  f17'
+			'f34  .   .   .   .   .   .   .   .   .  f18'
+			'f33  .   .   .   .   .   .   .  f42  .  f19'
+			'f32  .   .   .   .   .   .   .   .   .  f20'
+			'f31 f30 f29 f28 f27 f26 f25 f24 f23 f22 f21';
+
+		& > #branding {
+			@apply relative flex origin-center -rotate-45 items-center justify-center;
+			& > div {
+				@apply pointer-events-none absolute flex w-screen flex-col items-center justify-center text-center;
+				& > h1 {
+					@apply text-[500%] leading-none font-bold uppercase;
+				}
+				& > p {
+					@apply top-1/4 text-sm leading-none font-semibold whitespace-nowrap;
+				}
+			}
+		}
+	}
 }

@@ -2,7 +2,7 @@
 	import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import './select.css';
 	import Icon from './Icon.svelte';
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import Button from './Button.svelte';
 	import Input from './Input.svelte';
 
@@ -49,13 +49,55 @@
 		>;
 	} = $props();
 
+	let isSearching = $state(false);
+	let refInput: Input | null = null;
+
+	onMount(() => {
+		if (!refInput) return;
+		restoreSearchValue();
+		if (others.autofocus) setOpen(true);
+	});
+
+	let filteredItems = $derived(() =>
+		items.filter((item) => {
+			const text = getText(item).toUpperCase();
+			return text.includes(search.toUpperCase());
+		})
+	);
+
+	function restoreSearchValue(): void {
+		if (!search && value) {
+			search = getText(value);
+		}
+	}
+
 	function isActive(item: T): boolean {
 		if (!value) return false;
 		return getKey(value) === getKey(item);
 	}
+
+	function setOpen(open: boolean): void {
+		opened = open;
+		isSearching = false;
+		if (opened && refInput) {
+			refInput.selectAll();
+		}
+		if (!opened) {
+			restoreSearchValue();
+		}
+	}
 </script>
 
-<div {...others} class="select {others.class ?? ''}">
+<div
+	{...others}
+	class="select {others.class ?? ''}"
+	onfocusout={(e) => {
+		const related = e.relatedTarget as HTMLElement | null;
+		if (!related || !e.currentTarget.contains(related)) {
+			setOpen(false);
+		}
+	}}
+>
 	<div class="relative">
 		<div class="flex items-center">
 			{#if value}
@@ -70,18 +112,19 @@
 				/>
 			{/if}
 			<Input
+				bind:this={refInput}
 				{label}
 				hideLabel
 				placeholder={label}
-				value={search}
+				bind:value={search}
 				id="combobox"
 				class="flex-1 [&>div>input]:!rounded-e-none"
 				type="text"
 				role="combobox"
 				aria-controls="options"
 				aria-expanded="false"
-				onfocus={() => (opened = true)}
-				onblur={() => (opened = false)}
+				onfocus={() => setOpen(true)}
+				oninput={() => (isSearching = true)}
 			/>
 			{#if value}
 				{@render afterItem?.({ item: value, index: -1 })}
@@ -90,7 +133,7 @@
 				variant="secondary"
 				class="!rounded-s-none"
 				type="button"
-				onclick={() => (opened = !opened)}
+				onclick={() => setOpen(!opened)}
 			>
 				<svg
 					class="size-5 text-gray-400"
@@ -108,70 +151,69 @@
 			</Button>
 		</div>
 
-		{#if opened}
-			<ul
-				class="absolute top-12 z-10 flex max-h-56 w-full flex-col overflow-auto rounded-md bg-gray-600 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-hidden sm:text-sm"
-				id="options"
-				role="listbox"
-			>
-				<!--
+		<ul
+			class="absolute top-12 z-10 flex max-h-56 w-full flex-col overflow-auto rounded-md bg-gray-600 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-hidden sm:text-sm"
+			class:hidden={!opened}
+			id="options"
+			role="listbox"
+		>
+			<!--
         Combobox option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
 
         Active: "text-white bg-indigo-600 outline-hidden", Not Active: "text-gray-900"
       -->
-				{#each items as item, index (index)}
-					<Button
-						variant={isActive(item) ? 'primary' : 'secondary'}
-						class="relative !rounded-none"
-						id="option-{index}"
-						role="option"
-						aria-selected={isActive(item)}
-						tabindex={-1}
-						onclick={() => {
-							value = item;
-							search = getText(item);
-							onchange?.(item);
-							opened = false;
-						}}
-					>
-						<div class="flex items-center">
-							<!-- Selected: "font-semibold" -->
-							{#if value}
-								{@render beforeItem?.({ item, index })}
-							{/if}
-							<span class="truncate" class:font-semibold={isActive(item)}>{getText(item)}</span>
-							{#if value}
-								{@render afterItem?.({ item, index })}
-							{/if}
-						</div>
+			{#each isSearching ? filteredItems() : items as item, index (index)}
+				<Button
+					variant={isActive(item) ? 'primary' : 'secondary'}
+					class="relative !rounded-none"
+					id="option-{index}"
+					role="option"
+					aria-selected={isActive(item)}
+					tabindex={-1}
+					onclick={() => {
+						value = item;
+						search = getText(item);
+						onchange?.(item);
+						setOpen(false);
+					}}
+				>
+					<div class="flex items-center">
+						<!-- Selected: "font-semibold" -->
+						{#if value}
+							{@render beforeItem?.({ item, index })}
+						{/if}
+						<span class="truncate" class:font-semibold={isActive(item)}>{getText(item)}</span>
+						{#if value}
+							{@render afterItem?.({ item, index })}
+						{/if}
+					</div>
 
-						<!--
+					<!--
           Checkmark, only display for selected option.
 
           Active: "text-white", Not Active: "text-indigo-600"
         -->
-						{#if isActive(item)}
-							<span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600">
-								<svg
-									class="size-5"
-									viewBox="0 0 20 20"
-									fill="currentColor"
-									aria-hidden="true"
-									data-slot="icon"
-								>
-									<path
-										fill-rule="evenodd"
-										d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-										clip-rule="evenodd"
-									/>
-								</svg>
-							</span>
-						{/if}
-					</Button>
-				{/each}
+					{#if isActive(item)}
+						<span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600">
+							<svg
+								class="size-5"
+								viewBox="0 0 20 20"
+								fill="currentColor"
+								aria-hidden="true"
+								data-slot="icon"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</span>
+					{/if}
+				</Button>
+			{/each}
 
-				<!-- More items... -->
-			</ul>
-		{/if}
+			<!-- More items... -->
+		</ul>
 	</div>
 </div>

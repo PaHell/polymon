@@ -12,7 +12,6 @@
 	import { p2p, username } from '$lib/p2p';
 
 	const MAX_PLAYERS = 5;
-	let isReady = $state(false);
 	let chatMessages: {
 		userId: string;
 		message: string;
@@ -21,32 +20,46 @@
 
 	let players: App.Data.Player[] = $state([]);
 	let bots: App.Data.Bot[] = $state([]);
-	let kickDialogOpened = $state(false);
-	let youGotKickedDialogOpened = $state(false);
 	let kickPlayerId: string | undefined = $state();
+	let kickDialogOpened = $state(false);
+	let disconnectedDialogOpened = $state(false);
+	let kickReason = $state('');
 
-	p2p.subscribe(({ connectedLobbyCode, identities }) => {
-		if (!connectedLobbyCode) {
-			youGotKickedDialogOpened = true;
+	p2p.subscribe(({ peer, connectedLobbyCode, identities }) => {
+		if (!peer || !connectedLobbyCode) {
+			disconnectedDialogOpened = true;
 			return;
 		}
 		players = [
-			...Object.entries(identities).map(([id, name]) => ({
+			...Object.entries(identities).map(([id]) => ({
 				id,
-				name,
 				figureId: '',
-				isReady: false,
-				isBot: false
+				isReady: false
 			}))
 		];
 	});
 
-	p2p.registerHandler<string, string>('/chat', (data, conn) => {
+	p2p.registerHandler<string, string>('/chat', (data, peerId) => {
+		console.log(`Chat message from ${peerId}: ${data}`);
 		chatMessages.push({
-			userId: conn,
+			userId: peerId,
 			message: data
 		});
 		return data;
+	});
+
+	p2p.registerHandler<string, void>('/kick-reason', (data, peerId) => {
+		console.log(`Player ${peerId} kicked with reason: ${data}`);
+		kickReason = data;
+	});
+
+	p2p.registerHandler<App.Data.Player, void>('/update-player', (data, peerId) => {
+		const index = players.findIndex((p) => p.id === peerId);
+		console.log(`before ${JSON.stringify(players[index], null, 4)}}`);
+		console.log(`Updating player ${data.id} (${data.isReady ? 'ready' : 'not ready'})`);
+		if (index === -1) return;
+		players[index] = data;
+		console.log(`after ${JSON.stringify(players[index], null, 4)}}`);
 	});
 
 	function copyLobbyCode() {
@@ -59,8 +72,11 @@
 	}
 
 	function toggleReady() {
-		isReady = !isReady;
-		console.log(`Player is now ${isReady ? 'ready' : 'not ready'}`);
+		const meIndex = players.findIndex((p) => p.id === $p2p.peer?.id);
+		console.log(`Player is now ${players[meIndex].isReady ? 'ready' : 'not ready'}`);
+		if (meIndex === -1) return;
+		players[meIndex].isReady = !players[meIndex].isReady;
+		p2p.broadcastRequest<App.Data.Player, void>('/update-player', players[meIndex]);
 	}
 
 	function leaveLobby() {
@@ -89,17 +105,36 @@
 	}
 
 	async function onChatMessageSend(value: string) {
-		const response = await p2p.sendRequest<string, string>('/chat', chatValue);
+		const response = await p2p.broadcastRequest<string, string>('/chat', chatValue);
 		chatValue = '';
 		console.log(`Chat message sent: ${value} -> ${response}`);
+	}
+
+	function onKickButton(playerId: App.Data.Player['id']) {
+		kickPlayerId = playerId;
+		kickDialogOpened = true;
 	}
 
 	function onKickPlayerConfirm() {
 		if (!kickPlayerId) return;
 		console.log(`Kicking player: ${kickPlayerId}`);
+		p2p.sendRequest<string, void>('/kick-reason', kickPlayerId, kickReason);
 		p2p.disconnectFromPeer(kickPlayerId);
 		kickDialogOpened = false;
 		kickPlayerId = undefined;
+	}
+
+	function onFigureChange(playerIdx: number, figureId: App.Data.Figure['id']) {
+		console.log(`before ${JSON.stringify(players[playerIdx], null, 4)}}`);
+		players[playerIdx].figureId = figureId;
+		console.log(`Player ${players[playerIdx].id} changed figure to ${figureId}`);
+		p2p.broadcastRequest<App.Data.Player, void>('/update-player', players[playerIdx]);
+	}
+
+	function onStartGame() {
+		console.log('Starting game with players:', players);
+		p2p.broadcastRequest<App.Data.Player[], void>('/start-game', players);
+		goto('/game');
 	}
 </script>
 
@@ -113,19 +148,25 @@
 >
 	{#snippet body()}
 		<p>Are you sure you want to remove this player?</p>
+		<Input label="Reason (optional)" bind:value={kickReason} placeholder="Reason" />
 	{/snippet}
 </Dialog>
 <Dialog
-	bind:opened={youGotKickedDialogOpened}
-	title="You got kicked"
+	bind:opened={disconnectedDialogOpened}
+	title="Disconnected"
 	primary="Ok"
 	onPrimary={() => {
-		youGotKickedDialogOpened = false;
+		disconnectedDialogOpened = false;
 		goto('/start');
 	}}
 >
 	{#snippet body()}
-		<p>You have been removed from the lobby.</p>
+		{#if kickReason}
+			<p>You have been kicked from the lobby.</p>
+			<p>Reason: {kickReason}</p>
+		{:else}
+			<p>You have been removed from the lobby.</p>
+		{/if}
 	{/snippet}
 </Dialog>
 <div id="lobby">
@@ -143,15 +184,14 @@
 			<Button variant="secondary" icon="clipboard" onclick={copyLobbyCode}>Copy</Button>
 		</div>
 	</header>
+	<code>{JSON.stringify($p2p.identities)}</code>
 	<main>
 		<div>
-			{#each players as player (player.id)}
+			{#each players as player, index (player.id)}
 				<JoinedPlayer
 					{...player}
-					onKick={() => {
-						kickPlayerId = player.id;
-						kickDialogOpened = true;
-					}}
+					onKick={onKickButton}
+					onFigureChange={(figureId) => onFigureChange(index, figureId)}
 				/>
 			{/each}
 			{#each bots as bot (bot.id)}
@@ -169,7 +209,20 @@
 			<Chat items={chatMessages} bind:value={chatValue} onsend={onChatMessageSend} />
 		</div>
 		<div>
-			<Checkbox label="Ready" bind:value={isReady} onclick={toggleReady} />
+			{#if $p2p.isHost}
+				<Button
+					variant="primary"
+					icon={icons.add}
+					disabled={players.filter((p) => $p2p.peer?.id !== p.id).every((p) => p.isReady)}
+					onclick={onStartGame}>Start Game</Button
+				>
+			{:else}
+				<Checkbox
+					label="Ready"
+					value={players.find((p) => p.id === $p2p.peer?.id)?.isReady}
+					onclick={toggleReady}
+				/>
+			{/if}
 		</div>
 		<div></div>
 	</footer>

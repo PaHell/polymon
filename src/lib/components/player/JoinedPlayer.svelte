@@ -12,13 +12,13 @@
 		id,
 		figureId,
 		isReady,
-		onKick: onremove,
+		onKick,
+		onFigureChange,
 		...others
 	}: HTMLAttributes<HTMLElement> &
 		App.Data.Player & {
-			onKick?: MouseEventHandler<HTMLButtonElement>;
-			onFigureChange?: (figureId: string) => void | Promise<void>;
-			onToggleReady?: () => void | Promise<void>;
+			onKick: (playerId: string) => unknown;
+			onFigureChange: (figureId: string) => unknown;
 		} = $props();
 
 	let figure: App.Data.Figure | undefined = $state();
@@ -35,25 +35,37 @@
 			class="button-kick-player"
 			value="Kick"
 			hideValue
-			onclick={onremove}
+			onclick={() => onKick(id)}
 		/>
 	{/if}
+	{id}
 	<h4 class="text-2xl">{$p2p.identities[id]}</h4>
-	<Select
-		label="Figure"
-		value={figure}
-		items={figures}
-		getKey={(item) => item.id}
-		getText={(item) => item.name}
-		onchange={(item) => (figureId = item?.id ?? '')}
-	>
-		{#snippet beforeItem({ item })}
-			{#if item.isUrl}
-				<img src={item.value} alt={item.name} class="size-6" />
-			{:else}
-				<Icon name={item.value} class="size-6" />
-			{/if}
-		{/snippet}
-	</Select>
-	<Icon name={isReady ? icons.ready : icons.unready} class="!text-[3rem]" />
+	{#if $p2p.peer?.id === id}
+		<Select
+			label="Figure"
+			value={figure}
+			items={figures}
+			getKey={(item) => item.id}
+			getText={(item) => item.name}
+			onchange={(item) => (item?.id ? onFigureChange(item.id) : {})}
+		>
+			{#snippet beforeItem({ item })}
+				{#if item.isUrl}
+					<img src={item.value} alt={item.name} class="size-6" />
+				{:else}
+					<Icon name={item.value} class="size-6" />
+				{/if}
+			{/snippet}
+		</Select>
+	{:else if figure}
+		{#if figure.isUrl}
+			<img src={figure.value} alt={figure.name} class="size-6" />
+		{:else}
+			<Icon name={figure.value} class="size-6" />
+		{/if}
+		<p>{figure.name}</p>
+	{/if}
+	{#if true || $p2p.peer?.id !== id}
+		<Icon name={isReady ? icons.ready : icons.unready} class="!text-[3rem]" />
+	{/if}
 </div>

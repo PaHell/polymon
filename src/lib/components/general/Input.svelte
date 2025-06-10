@@ -19,6 +19,12 @@
 	} = $props();
 
 	let internalId = `checkbox-${Math.random().toString(36).substr(2, 9)}`;
+
+	export function selectAll() {
+		const input = document.getElementById(internalId) as HTMLInputElement;
+		if (!input) return;
+		input.select();
+	}
 </script>
 
 <div {id} class="input {classes ?? ''}">

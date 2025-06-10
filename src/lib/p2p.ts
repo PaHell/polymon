@@ -34,7 +34,7 @@ export const p2p = function () {
             { resolve: (data: unknown) => void; reject: (err: Error) => void; timeout: ReturnType<typeof setTimeout> }
       >();
 
-      const requestHandlers = new Map<string, (payload: unknown, connectionId: DataConnection["connectionId"]) => Promise<unknown>>();
+      const requestHandlers = new Map<string, (payload: unknown, peerId: string) => Promise<unknown>>();
 
       function handleIncomingMessage(conn: DataConnection, message: P2PMessage) {
             switch (message.type) {
@@ -47,7 +47,7 @@ export const p2p = function () {
                                     return;
                               }
                               try {
-                                    const result = await handler(payload, conn.connectionId);
+                                    const result = await handler(payload, conn.peer);
                                     conn.send({ type: 'response', id, payload: result });
                               } catch (err) {
                                     conn.send({ type: 'error', id, error: err.message || 'Unknown error' });
@@ -142,9 +142,9 @@ export const p2p = function () {
                         });
 
                         // Handle incoming identity payloads
-                        p2p.registerHandler<string, void>('identify', async (name, conn) => {
+                        p2p.registerHandler<string, void>('identify', async (name, peerId) => {
                               update((state) => {
-                                    state.identities[conn] = name;
+                                    state.identities[peerId] = name;
                                     return state;
                               });
                         });
@@ -175,9 +175,9 @@ export const p2p = function () {
 
 
                   // Handle incoming identity payloads
-                  p2p.registerHandler<string, void>('identify', async (name, conn) => {
+                  p2p.registerHandler<string, void>('identify', async (name, peerId) => {
                         update((state) => {
-                              state.identities[conn] = name;
+                              state.identities[peerId] = name;
                               return state;
                         });
                   });
@@ -202,24 +202,24 @@ export const p2p = function () {
                   });
             },
 
-            disconnectFromPeer: (connectionId: string) => {
+            disconnectFromPeer: (peer: string) => {
                   update((state) => {
-                        const conn = state.connections.find(c => c.connectionId === connectionId);
+                        const conn = state.connections.find(c => c.peer === peer);
                         if (conn) {
                               conn.removeAllListeners();
                               conn.close();
                               state.connections = state.connections.filter(c => c !== conn);
-                              delete state.identities[connectionId];
+                              delete state.identities[peer];
                         }
                         return state;
                   });
             },
 
-            sendRequest: function <In, Out>(action: string, connectionId: string, payload?: In): Promise<Out> {
+            sendRequest: function <In, Out>(action: string, peer: string, payload?: In): Promise<Out> {
                   const state = get(store);
                   if (!state.connections.length || !state.peer) throw new Error('No active connection');
-                  const conn = state.connections.find(c => c.connectionId === connectionId);
-                  if (!conn) throw new Error(`Connection with ID ${connectionId} not found`);
+                  const conn = state.connections.find(c => c.peer === peer);
+                  if (!conn) throw new Error(`Connection with ID ${peer} not found`);
                   const id = crypto.randomUUID();
                   const message: P2PMessage = { type: 'request', id, action, payload };
 
@@ -275,7 +275,7 @@ export const p2p = function () {
 
             registerHandler: function <In, Out>(
                   action: string,
-                  handler: (payload: In, connectionId: DataConnection["connectionId"]) => Promise<Out> | Out
+                  handler: (payload: In, peerId: string) => Promise<Out> | Out
             ) {
                   requestHandlers.set(action, handler);
             },

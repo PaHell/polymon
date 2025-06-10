@@ -1,0 +1,47 @@
+@reference "$lib/../app.css";
+
+.game-field {
+	@apply flex h-full w-full flex-wrap overflow-hidden border-inherit;
+	& > * {
+		@apply truncate;
+	}
+	&.field-layout-0 {
+		@apply flex-col border-e-2 border-b-2;
+	}
+	&.field-layout-1 {
+		@apply flex-col-reverse border-s-2 border-b-2;
+	}
+	&.field-layout-2 {
+		@apply flex-col-reverse border-s-2 border-t-2;
+	}
+	&.field-layout-3 {
+		@apply flex-col border-e-2 border-t-2;
+	}
+	&.field-layout-0,
+	&.field-layout-2 {
+		& > .buildings {
+			@apply h-2;
+		}
+	}
+	&.field-layout-1,
+	&.field-layout-3 {
+		& > .buildings {
+			@apply h-full w-2;
+		}
+	}
+	&:nth-child(10) {
+		@apply border-e-0;
+	}
+	&:nth-child(20) {
+		@apply border-b-0;
+	}
+	&:nth-child(30) {
+		@apply border-s-0;
+	}
+	&:nth-child(40) {
+		@apply border-t-0;
+	}
+	& > .buildings {
+		@apply shrink-0;
+	}
+}
