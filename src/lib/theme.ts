@@ -33,14 +33,14 @@ export const themes: App.Data.Theme[] = [
             },
             properties: {
                   utilities: [
-                        { name: "Electric Company", image: "", background: "" },
-                        { name: "Water Works", image: "", background: "" }
+                        { name: "Electric Company", image: "/themes/default/electric-company.svg", background: "" },
+                        { name: "Water Works", image: "/themes/default/waterworks.svg", background: "" }
                   ],
                   railroads: [
-                        { name: "Kings Cross Station", image: "", background: "" },
-                        { name: "Marylebone Station", image: "", background: "" },
-                        { name: "Fenchurch St. Station", image: "", background: "" },
-                        { name: "Liverpool St. Station", image: "", background: "" }
+                        { name: "Kings Cross Station", image: "/themes/default/railroad.svg", background: "" },
+                        { name: "Marylebone Station", image: "/themes/default/railroad.svg", background: "" },
+                        { name: "Fenchurch St. Station", image: "/themes/default/railroad.svg", background: "" },
+                        { name: "Liverpool St. Station", image: "/themes/default/railroad.svg", background: "" }
                   ],
                   streets: {
                         brown: [
@@ -82,10 +82,10 @@ export const themes: App.Data.Theme[] = [
                               { name: "Mayfair", background: "" }
                         ]
                   },
-                  communityChest: { name: "Community Chest", image: "", background: "" },
-                  chance: { name: "Chance", image: "", background: "" },
-                  incomeTax: { name: "Income Tax", image: "", background: "" },
-                  luxuryTax: { name: "Luxury Tax", image: "", background: "" },
+                  communityChest: { name: "Community Chest", image: "/themes/default/community-chest.svg", background: "" },
+                  chance: { name: "Chance", image: "/themes/default/chance.svg", background: "" },
+                  incomeTax: { name: "Income Tax", image: "/themes/default/electric-company.svg", background: "" },
+                  luxuryTax: { name: "Luxury Tax", image: "/themes/default/electric-company.svg", background: "" },
                   go: { name: "Go", image: "", background: "" },
                   goToJail: { name: "Go to Jail", image: "", background: "" },
                   freeParking: { name: "Free Parking", image: "", background: "" },

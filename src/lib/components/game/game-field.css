@@ -1,32 +1,53 @@
 @reference "$lib/../app.css";
 
 .game-field {
-	@apply flex h-full w-full flex-wrap overflow-hidden border-inherit;
-	& > * {
-		@apply truncate;
-	}
+	@apply flex h-full w-full overflow-hidden border-inherit text-center text-[10px] font-bold uppercase;
 	&.field-layout-0 {
-		@apply flex-col border-e-2 border-b-2;
+		@apply flex-col-reverse border-e-[2px] border-b-[2px];
+		& > .buildings {
+			@apply border-t-[2px];
+		}
+		& > img {
+			@apply mt-2;
+		}
 	}
 	&.field-layout-1 {
-		@apply flex-col-reverse border-s-2 border-b-2;
+		@apply flex-row border-s-[2px] border-b-[2px];
+		& > .buildings {
+			@apply border-e-[2px];
+		}
+		& > img {
+			@apply me-1;
+		}
 	}
 	&.field-layout-2 {
-		@apply flex-col-reverse border-s-2 border-t-2;
+		@apply flex-col border-s-[2px] border-t-[2px];
+		& > .buildings {
+			@apply border-b-[2px];
+		}
+		& > img {
+			@apply mb-2;
+		}
 	}
 	&.field-layout-3 {
-		@apply flex-col border-e-2 border-t-2;
+		@apply flex-row-reverse border-e-[2px] border-t-[2px];
+		& > .buildings {
+			@apply border-s-[2px];
+		}
+		& > img {
+			@apply ms-1;
+		}
 	}
 	&.field-layout-0,
 	&.field-layout-2 {
 		& > .buildings {
-			@apply h-2;
+			@apply h-[32px];
 		}
 	}
 	&.field-layout-1,
 	&.field-layout-3 {
 		& > .buildings {
-			@apply h-full w-2;
+			@apply w-[32px];
 		}
 	}
 	&:nth-child(10) {
@@ -41,7 +62,35 @@
 	&:nth-child(40) {
 		@apply border-t-0;
 	}
+	&.utility,
+	&.railroad {
+		&.field-layout-0 {
+			@apply pb-2;
+		}
+		&.field-layout-1 {
+			@apply pe-2;
+		}
+		&.field-layout-2 {
+			@apply pt-2;
+		}
+		&.field-layout-3 {
+			@apply ps-2;
+		}
+	}
+	&.chance,
+	&.community-chest {
+		@apply !items-center !justify-center;
+		& > .details {
+			@apply flex-0 py-0;
+		}
+	}
 	& > .buildings {
 		@apply shrink-0;
+	}
+	& > img {
+		@apply w-[50px] self-center;
+	}
+	& > .details {
+		@apply flex flex-1 flex-col justify-between py-2;
 	}
 }

@@ -65,8 +65,12 @@
 		{#each fields as field, index (index)}
 			<GameField {index} {...field} />
 		{/each}
-		<div style="grid-area: f41;">Chance</div>
-		<div style="grid-area: f42;">Community Chests</div>
+		<div style="grid-area: f41;" class="deck chance">
+			<div>{$theme.properties.chance.name}</div>
+		</div>
+		<div style="grid-area: f42;" class="deck community-chest">
+			<div>{$theme.properties.communityChest.name}</div>
+		</div>
 		<div style="grid-area: f43;" id="branding">
 			<div>
 				<h1 style={$theme.branding.style}>{$theme.branding.name}</h1>

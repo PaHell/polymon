@@ -31,7 +31,9 @@
 	class="buildings"
 	style="background-color: {$theme.colors.streets[Math.trunc(index / 5)]};"
 ></div>
-<h5 class="">{street?.name}</h5>
-{#if price}
-	<p class="price">{price}{$theme.currency}</p>
-{/if}
+<div class="details">
+	<p>{street?.name}</p>
+	{#if price}
+		<p>{$theme.currency}{price}</p>
+	{/if}
+</div>
