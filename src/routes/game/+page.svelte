@@ -66,13 +66,33 @@
 			<GameField {index} {...field} />
 		{/each}
 		<div style="grid-area: f41;" class="deck chance">
-			<div>{$theme.properties.chance.name}</div>
+			<div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div style={$theme.properties.chance.styleCard}>
+					<img src={$theme.properties.chance.imageCard} alt={$theme.properties.chance.name} />
+					<p>{$theme.properties.chance.name}</p>
+				</div>
+			</div>
 		</div>
 		<div style="grid-area: f42;" class="deck community-chest">
-			<div>{$theme.properties.communityChest.name}</div>
+			<div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div style={$theme.properties.communityChest.styleCard}>
+					<img
+						src={$theme.properties.communityChest.imageCard}
+						alt={$theme.properties.communityChest.name}
+					/>
+					<p>{$theme.properties.communityChest.name}</p>
+				</div>
+			</div>
 		</div>
 		<div style="grid-area: f43;" id="branding">
 			<div>
+				<img src={$theme.branding.image} alt={$theme.branding.name} />
 				<h1 style={$theme.branding.style}>{$theme.branding.name}</h1>
 				<p>{$theme.branding.slogan}</p>
 			</div>

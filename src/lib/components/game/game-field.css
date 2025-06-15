@@ -84,8 +84,63 @@
 			@apply flex-0 py-0;
 		}
 	}
+	&.jail {
+		@apply relative flex items-end justify-start;
+		& > p {
+			@apply absolute top-0 left-0 w-full text-center text-[15px] leading-[45px];
+			&:nth-child(1) {
+				@apply pe-[45px];
+			}
+			&:nth-child(2) {
+				@apply left-full origin-top-left rotate-90 ps-[45px];
+			}
+		}
+		& > div {
+			@apply absolute border-inherit;
+			@apply flex h-2/3 w-2/3 flex-col items-center justify-center space-y-[5px] border-e-[2px] border-t-[2px];
+			& > img {
+				@apply h-1/2 w-1/2;
+			}
+			& > p {
+				@apply text-[15px];
+			}
+		}
+	}
+	&.go-to-jail,
+	&.free-parking {
+		& > div {
+			@apply flex h-full w-full flex-col items-center justify-center pb-[10px];
+			& > img {
+				@apply h-1/2 w-1/2;
+			}
+			& > p {
+				@apply text-[15px];
+			}
+		}
+	}
+	&.go-to-jail > div {
+		@apply rotate-45;
+	}
+	&.free-parking > div {
+		@apply -rotate-45;
+	}
+	&.go {
+		@apply relative flex items-center justify-center;
+		& > img {
+			@apply absolute bottom-[5px] h-[20px] w-auto shrink-0;
+		}
+		& > div {
+			@apply flex h-full w-full -rotate-45 flex-col items-center justify-center pb-[15px];
+			& > p {
+				@apply text-[12px];
+				&:nth-child(2) {
+					@apply my-[-5px] text-[30px];
+				}
+			}
+		}
+	}
 	& > .buildings {
-		@apply shrink-0;
+		@apply shrink-0 border-inherit;
 	}
 	& > img {
 		@apply w-[50px] self-center;

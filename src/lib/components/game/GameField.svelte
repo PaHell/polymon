@@ -21,31 +21,53 @@
 	style="grid-area: f{index + 1};"
 >
 	{#if field.type === FieldType.Go}
-		<p>Start</p>
-		<p>Collect {field.toEarn}{$theme.currency}</p>
+		<div>
+			<p>
+				Collect<br />{field.toEarn}{$theme.currency}
+				{$theme.properties.go.salary}<br />as you pass
+			</p>
+			<p>{$theme.properties.go.name}</p>
+		</div>
+		<img src={$theme.properties.go.image} alt={$theme.properties.go.name} />
 	{:else if field.type === FieldType.Street}
 		<GameFieldStreet {index} {...field} />
 	{:else if field.type === FieldType.CommunityChest}
-		<img src={$theme.properties.communityChest.image} alt="Community Chest" />
+		<img
+			src={$theme.properties.communityChest.imageField}
+			alt={$theme.properties.communityChest.name}
+		/>
 		<div class="details">
 			<p>{$theme.properties.communityChest.name}</p>
 		</div>
 	{:else if field.type === FieldType.Chance}
-		<img src={$theme.properties.chance.image} alt="Chance" />
+		<img src={$theme.properties.chance.imageField} alt={$theme.properties.chance.name} />
 		<div class="details">
 			<p>{$theme.properties.chance.name}</p>
 		</div>
 	{:else if field.type === FieldType.Jail}
-		<div class="details">
+		<p>{$theme.properties.justVisiting.row1}</p>
+		<p>{$theme.properties.justVisiting.row2}</p>
+		<div style="background-image: url({$theme.properties.jail.background});">
+			<img src={$theme.properties.jail.image} alt={$theme.properties.jail.name} />
 			<p>{$theme.properties.jail.name}</p>
 		</div>
 	{:else if field.type === FieldType.GoToJail}
-		<div class="details">
+		<div>
 			<p>{$theme.properties.goToJail.name}</p>
+			<img
+				src={$theme.properties.goToJail.image}
+				alt="{$theme.properties.goToJail.name} {$theme.properties.jail.name}"
+			/>
+			<p>{$theme.properties.jail.name}</p>
 		</div>
 	{:else if field.type === FieldType.FreeParking}
-		<div class="details">
-			<p>{$theme.properties.freeParking.name}</p>
+		<div>
+			<p>{$theme.properties.freeParking.row1}</p>
+			<img
+				src={$theme.properties.freeParking.image}
+				alt="{$theme.properties.freeParking.row1} {$theme.properties.freeParking.row2}"
+			/>
+			<p>{$theme.properties.freeParking.row2}</p>
 		</div>
 	{:else if field.type === FieldType.Railroad}
 		<GameFieldRailroad {index} {...field} />

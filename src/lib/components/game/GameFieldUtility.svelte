@@ -16,7 +16,7 @@
 
 	let utility: App.Data.Railroad | undefined = $state();
 	$effect(() => {
-		const half = Math.trunc(index / fieldTypeOrder.length);
+		const half = Math.trunc(index / (fieldTypeOrder.length / 2));
 		utility = $theme.properties.utilities[half] ?? null;
 	});
 </script>

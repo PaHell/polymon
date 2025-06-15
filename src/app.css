@@ -65,9 +65,38 @@
 			'f31 f30 f29 f28 f27 f26 f25 f24 f23 f22 f21';
 
 		& > .deck {
-			@apply relative flex -rotate-45 items-center justify-center;
+			@apply relative z-10 flex -rotate-45 items-center justify-center;
 			& > div {
-				@apply absolute flex h-[160px] w-[240px] items-center justify-center rounded-lg border-[2px];
+				@apply absolute flex h-[160px] w-[240px] items-center justify-center rounded-lg;
+				& > div {
+					@apply absolute flex h-full w-full flex-col items-center justify-center rounded-lg border-[10px] border-white bg-gray-300 shadow-md;
+					&:nth-child(1) {
+						@apply -rotate-9 border-[#dfdfdf];
+					}
+					&:nth-child(2) {
+						@apply -rotate-6 border-[#efefef];
+					}
+					&:nth-child(3) {
+						@apply -rotate-3 border-[#f0f0f0];
+					}
+					& > img {
+						@apply h-1/2 w-1/2;
+					}
+					& > p {
+						@apply text-[15px] font-bold text-white uppercase;
+					}
+				}
+			}
+			& + .deck > div > div {
+				&:nth-child(1) {
+					@apply rotate-9;
+				}
+				&:nth-child(2) {
+					@apply rotate-6;
+				}
+				&:nth-child(3) {
+					@apply rotate-3;
+				}
 			}
 			&.chance > div {
 				@apply top-[50px];
@@ -81,6 +110,9 @@
 			@apply relative flex origin-center -rotate-45 items-center justify-center;
 			& > div {
 				@apply pointer-events-none absolute flex w-screen flex-col items-center justify-center text-center;
+				& > img {
+					@apply relative mt-[-117px] mb-[-33px] h-[150px] w-[150px];
+				}
 				& > h1 {
 					@apply text-[500%] leading-none font-bold uppercase;
 				}

@@ -7,6 +7,7 @@ export const themes: App.Data.Theme[] = [
             currency: "$",
             branding: {
                   name: "Monopoly",
+                  image: "/themes/default/branding.png",
                   slogan: "◈ The Fast-Dealing Property Trading Game ◈",
                   style: "border: 0.25rem solid #0c0e00; padding: 0.625rem 1.25rem; background-color: red; box-shadow: inset 0 8px 12px -4px rgba(255, 255, 255, .5), inset 0 -8px 12px -4px rgba(0, 0, 0, .5); margin-bottom: 0.5rem; color: white; text-shadow: -2px 2px 0 black, -1px 1px 0 black, 2px -2px 0 lightgray, 1px -1px 0 lightgray;"
             },
@@ -55,7 +56,7 @@ export const themes: App.Data.Theme[] = [
                         pink: [
                               { name: "Pall Mall", background: "" },
                               { name: "Whitehall", background: "" },
-                              { name: "Northumberland Avenue", background: "" }
+                              { name: "Northumbrlnd Avenue", background: "" }
                         ],
                         orange: [
                               { name: "Bow Street", background: "" },
@@ -82,14 +83,27 @@ export const themes: App.Data.Theme[] = [
                               { name: "Mayfair", background: "" }
                         ]
                   },
-                  communityChest: { name: "Community Chest", image: "/themes/default/community-chest.svg", background: "" },
-                  chance: { name: "Chance", image: "/themes/default/chance.svg", background: "" },
+                  communityChest: {
+                        name: "Community Chest",
+                        imageField: "/themes/default/community-chest-field.svg",
+                        imageCard: "/themes/default/community-chest-card.svg",
+                        background: "",
+                        styleCard: "background-color: #9DD9EC; background: linear-gradient(135deg, #61b3ff 0%, #74c0ff 50%, #61b3ff 100%);"
+                  },
+                  chance: {
+                        name: "Chance",
+                        imageField: "/themes/default/chance-field.svg",
+                        imageCard: "/themes/default/chance-card.svg",
+                        background: "",
+                        styleCard: "background-color: #BB4E9C; background: linear-gradient(135deg, #f49827 0%, #f9a93d 50%, #f49827 100%);"
+                  },
                   incomeTax: { name: "Income Tax", image: "/themes/default/electric-company.svg", background: "" },
                   luxuryTax: { name: "Luxury Tax", image: "/themes/default/electric-company.svg", background: "" },
-                  go: { name: "Go", image: "", background: "" },
-                  goToJail: { name: "Go to Jail", image: "", background: "" },
-                  freeParking: { name: "Free Parking", image: "", background: "" },
-                  jail: { name: "In Jail", image: "", background: "" }
+                  go: { name: "Go", salary: "Salary", image: "/themes/default/go.svg", background: "" },
+                  goToJail: { name: "Go To", image: "/themes/default/go-to-jail.svg", background: "" },
+                  freeParking: { row1: "Free", row2: "Parking", image: "/themes/default/free-parking.svg", background: "" },
+                  jail: { name: "In Jail", image: "/themes/default/jail.svg", background: "" },
+                  justVisiting: { row1: "Just", row2: "Visting", background: "" }
             }
       },
       {
@@ -107,10 +121,10 @@ export const themes: App.Data.Theme[] = [
                   style: "font-weight: bold; font-style: italic;"
             },
             colors: {
-                  background: "#f3f3f3",
-                  board: "#ffffff",
-                  border: "#333333",
-                  text: "#1a1a1a",
+                  background: "#333",
+                  board: "#333",
+                  border: "#111",
+                  text: "#fff",
                   streets: [
                         "#4b3621", // Luxury brown (for bankrupt assets)
                         "#9ccfea", // Corporate blue (office buildings)
@@ -128,10 +142,10 @@ export const themes: App.Data.Theme[] = [
                         { name: "SIGNA Development", image: "", background: "#d9d9d9" }
                   ],
                   railroads: [
-                        { name: "Vienna Central Hub", image: "", background: "#bcccdc" },
-                        { name: "Berlin Projekt", image: "", background: "#abc4ff" },
-                        { name: "Hamburg Hafen", image: "", background: "#ddeeff" },
-                        { name: "Munich Megabau", image: "", background: "#ccddee" }
+                        { name: "Vienna Central Hub", image: "/themes/default/railroad.svg", background: "" },
+                        { name: "Berlin Projekt", image: "/themes/default/railroad.svg", background: "" },
+                        { name: "Hamburg Hafen", image: "/themes/default/railroad.svg", background: "" },
+                        { name: "Munich Megabau", image: "/themes/default/railroad.svg", background: "" }
                   ],
                   streets: {
                         brown: [
@@ -173,14 +187,15 @@ export const themes: App.Data.Theme[] = [
                               { name: "Benko Penthouse", background: "#1a1a1a" }
                         ]
                   },
-                  communityChest: { name: "Investor Mailbox", image: "", background: "#f0e68c" },
-                  chance: { name: "Market Volatility", image: "", background: "#ffcc00" },
-                  incomeTax: { name: "Real Estate Tax", image: "", background: "#b22222" },
-                  luxuryTax: { name: "Luxury Asset Levy", image: "", background: "#800000" },
-                  go: { name: "Start Over", image: "", background: "#2ecc71" },
-                  goToJail: { name: "Go to Investigative Custody", image: "", background: "#e74c3c" },
-                  freeParking: { name: "Investor Retreat", image: "", background: "#95a5a6" },
-                  jail: { name: "In Custody", image: "", background: "#7f8c8d" }
+                  communityChest: { name: "Investor Mailbox", imageField: "/themes/default/community-chest.svg", background: "" },
+                  chance: { name: "Market Volatility", imageField: "/themes/default/chance.svg", background: "" },
+                  incomeTax: { name: "Real Estate Tax", image: "/themes/default/income-tax.svg", background: "" },
+                  luxuryTax: { name: "Luxury Asset Levy", image: "/themes/default/luxury-tax.svg", background: "" },
+                  go: { name: "Profit", salary: "From Investors", image: "/themes/default/go.svg", background: "" },
+                  goToJail: { name: "Go to", image: "/themes/default/go-to-jail.svg", background: "" },
+                  freeParking: { row1: "Investor", row2: "Retreat", image: "/themes/default/free-parking.svg", background: "" },
+                  jail: { name: "Custody", image: "/themes/default/jail.svg", background: "" },
+                  justVisiting: { row1: "Just", row2: "Visiting", background: "" }
             }
       }
 ];

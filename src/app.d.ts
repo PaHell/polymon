@@ -26,24 +26,50 @@ declare global {
 				background?: string;
 			}
 			type Railroad = Utility;
-			type CommunityChest = Utility;
-			type Chance = Utility;
+			type CommunityChest = {
+				name: string;
+				imageField: string;
+				imageCard: string;
+				background?: string;
+				styleCard: string;
+			};
+			type Chance = CommunityChest;
 			type IncomeTax = Utility;
 			type LuxuryTax = Utility;
-			type Go = Utility;
+			type Go = {
+				name: string;
+				salary: string;
+				image: string;
+				background?: string;
+			};
 			type GoToJail = Utility;
-			type FreeParking = Utility;
-			type Jail = Utility;
+			type FreeParking = {
+				row1: string;
+				row2: string;
+				image: string;
+				background?: string;
+			};
+			type Jail = {
+				name: string;
+				image: string;
+				background?: string;
+			};
 			type Property = {
 				name: string;
 				background?: string;
 			}
+			type JustVisiting = {
+				row1: string;
+				row2: string;
+				background?: string;
+			};
 			type Theme = {
 				id: string;
 				name: string;
 				currency: string;
 				branding: {
 					name: string;
+					image: string;
 					slogan: string;
 					style?: string;
 				};
@@ -89,6 +115,7 @@ declare global {
 					goToJail: GoToJail;
 					freeParking: FreeParking;
 					jail: Jail;
+					justVisiting: JustVisiting;
 				};
 				// interface Error {}
 				// interface Locals {}
