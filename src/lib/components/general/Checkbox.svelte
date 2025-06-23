@@ -11,31 +11,17 @@
 		hideLabel = false,
 		children,
 		...others
-	}: Omit<HTMLInputAttributes, 'value'> & {
-		value?: boolean | 'indeterminate';
+	}: Omit<HTMLInputAttributes, 'value' | 'checked'> & {
+		value: boolean;
 		variant?: 'checkbox' | 'toggle';
 		label: string;
 		hideLabel?: boolean;
 	} = $props();
 
+	let ref: HTMLInputElement | undefined = $state(undefined);
 	let internalId = `checkbox-${Math.random().toString(36).substr(2, 9)}`;
 
-	let ref: HTMLInputElement;
-
-	$effect(() => {
-		ref.checked = !!value;
-		ref.indeterminate = value === 'indeterminate';
-	});
-
 	function internalOnChange(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
-		const target = event.target as HTMLInputElement;
-		if (target.checked) {
-			value = true;
-		} else if (target.indeterminate) {
-			value = 'indeterminate';
-		} else {
-			value = false;
-		}
 		if (others.onchange) {
 			others.onchange(event);
 		}
@@ -48,11 +34,11 @@
 		{...others}
 		id={internalId}
 		type="checkbox"
-		{value}
 		onchange={internalOnChange}
+		bind:checked={value}
 	/>
 	<svg viewBox="0 0 14 14" fill="none">
-		{#if value === 'indeterminate'}
+		{#if ref?.indeterminate}
 			<path d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 		{:else if value === true}
 			<path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />

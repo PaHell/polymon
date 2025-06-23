@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-export const themes: App.Data.Theme[] = [
+export const themes: App.Data.Theme.Model[] = [
       {
             id: "default",
             name: "Default",
@@ -111,6 +111,7 @@ export const themes: App.Data.Theme[] = [
             name: "Signa Bust",
             currency: "€",
             branding: {
+                  image: "/themes/default/branding.png",
                   name: "SIGNA",
                   slogan: "◆ Build Empires. Watch Them Crumble. ◆",
                   style: "border: 0.25rem solid gold; padding: 0.625rem 1.25rem; background: linear-gradient(to right, #003366, #8b0000); box-shadow: inset 0 8px 12px -4px rgba(255, 255, 255, .6), inset 0 -8px 12px -4px rgba(0, 0, 0, .4); margin-bottom: 0.5rem; color: white; text-shadow: 0 1px 2px black, 0 0 5px #ffd700;"
@@ -187,8 +188,8 @@ export const themes: App.Data.Theme[] = [
                               { name: "Benko Penthouse", background: "#1a1a1a" }
                         ]
                   },
-                  communityChest: { name: "Investor Mailbox", imageField: "/themes/default/community-chest.svg", background: "" },
-                  chance: { name: "Market Volatility", imageField: "/themes/default/chance.svg", background: "" },
+                  communityChest: { name: "Investor Mailbox", imageField: "/themes/default/community-chest.svg", imageCard: "/themes/default/community-chest.svg", styleCard: "", background: "" },
+                  chance: { name: "Market Volatility", imageField: "/themes/default/chance.svg", imageCard: "/themes/default/chance.svg", styleCard: "", background: "" },
                   incomeTax: { name: "Real Estate Tax", image: "/themes/default/income-tax.svg", background: "" },
                   luxuryTax: { name: "Luxury Asset Levy", image: "/themes/default/luxury-tax.svg", background: "" },
                   go: { name: "Profit", salary: "From Investors", image: "/themes/default/go.svg", background: "" },
@@ -200,4 +201,4 @@ export const themes: App.Data.Theme[] = [
       }
 ];
 
-export const theme = writable<App.Data.Theme>(themes[0]);
+export const theme = writable<App.Data.Theme.Model>(themes[0]);

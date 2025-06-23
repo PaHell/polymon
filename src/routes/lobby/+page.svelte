@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { botNames } from '$lib';
+	import { botNames, PlayerColor, settings } from '$lib';
 	import Chat from '$lib/components/chat/Chat.svelte';
 	import Button from '$lib/components/general/Button.svelte';
 	import Checkbox from '$lib/components/general/Checkbox.svelte';
@@ -9,6 +9,7 @@
 	import Input from '$lib/components/general/Input.svelte';
 	import Bot from '$lib/components/player/Bot.svelte';
 	import JoinedPlayer from '$lib/components/player/JoinedPlayer.svelte';
+	import { createGame } from '$lib/game';
 	import { p2p, username } from '$lib/p2p';
 
 	const MAX_PLAYERS = 5;
@@ -18,8 +19,8 @@
 	}[] = $state([]);
 	let chatValue = $state('');
 
-	let players: App.Data.Player[] = $state([]);
-	let bots: App.Data.Bot[] = $state([]);
+	let players: App.Data.Game.Player[] = $state([]);
+	let bots: App.Data.Game.Bot[] = $state([]);
 	let kickPlayerId: string | undefined = $state();
 	let kickDialogOpened = $state(false);
 	let disconnectedDialogOpened = $state(false);
@@ -33,7 +34,7 @@
 		players = [
 			...Object.entries(identities).map(([id]) => ({
 				id,
-				figureId: '',
+				color: PlayerColor.Blue,
 				isReady: false
 			}))
 		];
@@ -53,13 +54,20 @@
 		kickReason = data;
 	});
 
-	p2p.registerHandler<App.Data.Player, void>('/update-player', (data, peerId) => {
+	p2p.registerHandler<App.Data.Game.Player, void>('/update-player', (data, peerId) => {
 		const index = players.findIndex((p) => p.id === peerId);
 		console.log(`before ${JSON.stringify(players[index], null, 4)}}`);
 		console.log(`Updating player ${data.id} (${data.isReady ? 'ready' : 'not ready'})`);
 		if (index === -1) return;
 		players[index] = data;
 		console.log(`after ${JSON.stringify(players[index], null, 4)}}`);
+	});
+
+	p2p.registerHandler<App.Data.Game.Player[], void>('/start-game', (data) => {
+		console.log('Game started with players:', data);
+		players = data;
+		createGame(players, bots, $settings);
+		goto('/game');
 	});
 
 	function copyLobbyCode() {
@@ -76,7 +84,7 @@
 		console.log(`Player is now ${players[meIndex].isReady ? 'ready' : 'not ready'}`);
 		if (meIndex === -1) return;
 		players[meIndex].isReady = !players[meIndex].isReady;
-		p2p.broadcastRequest<App.Data.Player, void>('/update-player', players[meIndex]);
+		p2p.broadcastRequest<App.Data.Game.Player, void>('/update-player', players[meIndex]);
 	}
 
 	function leaveLobby() {
@@ -94,7 +102,7 @@
 		bots.push({
 			id: botId,
 			name: botName,
-			figureId: ''
+			color: PlayerColor.Blue
 		});
 		console.log(`Bot added: ${botName} (${botId})`);
 	}
@@ -110,7 +118,7 @@
 		console.log(`Chat message sent: ${value} -> ${response}`);
 	}
 
-	function onKickButton(playerId: App.Data.Player['id']) {
+	function onKickButton(playerId: App.Data.Game.Player['id']) {
 		kickPlayerId = playerId;
 		kickDialogOpened = true;
 	}
@@ -124,16 +132,16 @@
 		kickPlayerId = undefined;
 	}
 
-	function onFigureChange(playerIdx: number, figureId: App.Data.Figure['id']) {
+	function onColorChange(playerIdx: number, color: PlayerColor) {
 		console.log(`before ${JSON.stringify(players[playerIdx], null, 4)}}`);
-		players[playerIdx].figureId = figureId;
-		console.log(`Player ${players[playerIdx].id} changed figure to ${figureId}`);
-		p2p.broadcastRequest<App.Data.Player, void>('/update-player', players[playerIdx]);
+		players[playerIdx].color = color;
+		console.log(`Player ${players[playerIdx].id} changed color to ${color}`);
+		p2p.broadcastRequest<App.Data.Game.Player, void>('/update-player', players[playerIdx]);
 	}
 
 	function onStartGame() {
 		console.log('Starting game with players:', players);
-		p2p.broadcastRequest<App.Data.Player[], void>('/start-game', players);
+		p2p.broadcastRequest<App.Data.Game.Player[], void>('/start-game', players);
 		goto('/game');
 	}
 </script>
@@ -191,11 +199,11 @@
 				<JoinedPlayer
 					{...player}
 					onKick={onKickButton}
-					onFigureChange={(figureId) => onFigureChange(index, figureId)}
+					onColorChange={(color) => onColorChange(index, color)}
 				/>
 			{/each}
 			{#each bots as bot (bot.id)}
-				<Bot {...bot} onremove={() => onRemoveBot(bot.id)} />
+				<Bot {...bot} onRemove={() => onRemoveBot(bot.id)} />
 			{/each}
 			{#if players.length + bots.length < MAX_PLAYERS}
 				<div>
@@ -213,7 +221,7 @@
 				<Button
 					variant="primary"
 					icon={icons.add}
-					disabled={players.filter((p) => $p2p.peer?.id !== p.id).every((p) => p.isReady)}
+					disabled={players.filter((p) => $p2p.peer?.id !== p.id).some((p) => !p.isReady)}
 					onclick={onStartGame}>Start Game</Button
 				>
 			{:else}

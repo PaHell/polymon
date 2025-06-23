@@ -76,7 +76,7 @@
 	{:else if field.type === FieldType.IncomeTax}
 		<div class="details">
 			<p>{$theme.properties.incomeTax.name}</p>
-			<p>{$theme.currency}{field.toPayFixed} <br />or<br /> {field.toPayPercentage * 100}%</p>
+			<p>{$theme.currency}{field.toPay}</p>
 		</div>
 	{:else if field.type === FieldType.LuxuryTax}
 		<div class="details">

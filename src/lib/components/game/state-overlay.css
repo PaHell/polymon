@@ -1,0 +1,8 @@
+@reference "$lib/../app.css";
+
+#state-overlay {
+	@apply pointer-events-none fixed top-0 left-0 flex h-full w-full items-center justify-center;
+	& > div {
+		@apply pointer-events-auto size-96 overflow-auto bg-gray-800 text-xs;
+	}
+}

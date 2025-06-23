@@ -179,13 +179,9 @@
 				>
 					<div class="flex items-center">
 						<!-- Selected: "font-semibold" -->
-						{#if value}
-							{@render beforeItem?.({ item, index })}
-						{/if}
+						{@render beforeItem?.({ item, index })}
 						<span class="truncate" class:font-semibold={isActive(item)}>{getText(item)}</span>
-						{#if value}
-							{@render afterItem?.({ item, index })}
-						{/if}
+						{@render afterItem?.({ item, index })}
 					</div>
 
 					<!--

@@ -1,33 +1,26 @@
 <script lang="ts">
-	import type { HTMLAttributes, MouseEventHandler } from 'svelte/elements';
+	import type { HTMLAttributes } from 'svelte/elements';
 	import './joined-player.css';
 	import Button from '../general/Button.svelte';
-	import Input from '../general/Input.svelte';
 	import Icon, { icons } from '../general/Icon.svelte';
 	import { p2p } from '$lib/p2p';
 	import Select from '../general/Select.svelte';
-	import { figures } from '$lib';
+	import SelectEnum from '../general/SelectEnum.svelte';
+	import { colors, PlayerColor } from '$lib';
 
 	let {
 		id,
-		figureId,
+		color,
 		isReady,
 		onKick,
-		onFigureChange,
-		...others
-	}: HTMLAttributes<HTMLElement> &
-		App.Data.Player & {
-			onKick: (playerId: string) => unknown;
-			onFigureChange: (figureId: string) => unknown;
-		} = $props();
-
-	let figure: App.Data.Figure | undefined = $state();
-	$effect(() => {
-		figure = figures.find((f) => f.id === figureId);
-	});
+		onColorChange
+	}: App.Data.Game.Player & {
+		onKick: (playerId: string) => unknown;
+		onColorChange: (color: PlayerColor | null | undefined) => unknown;
+	} = $props();
 </script>
 
-<div {...others} class="joined-player {others.class ?? ''}">
+<div class="joined-player">
 	{#if $p2p.isHost && id !== $p2p.peer?.id}
 		<Button
 			variant="secondary"
@@ -38,32 +31,23 @@
 			onclick={() => onKick(id)}
 		/>
 	{/if}
-	{id}
-	<h4 class="text-2xl">{$p2p.identities[id]}</h4>
+	<p>id: {id}</p>
+	<p>seed: {$p2p.identities[id].seed}</p>
+	<h4 class="text-2xl">{$p2p.identities[id].username}</h4>
 	{#if $p2p.peer?.id === id}
-		<Select
-			label="Figure"
-			value={figure}
-			items={figures}
-			getKey={(item) => item.id}
-			getText={(item) => item.name}
-			onchange={(item) => (item?.id ? onFigureChange(item.id) : {})}
+		<SelectEnum
+			label="Color"
+			bind:value={color}
+			entries={Object.entries(PlayerColor)}
+			onchange={onColorChange}
 		>
-			{#snippet beforeItem({ item })}
-				{#if item.isUrl}
-					<img src={item.value} alt={item.name} class="size-6" />
-				{:else}
-					<Icon name={item.value} class="size-6" />
-				{/if}
+			{#snippet beforeItem(item)}
+				<div class="h-4 w-4" style="background-color: {colors[item]};"></div>
 			{/snippet}
-		</Select>
-	{:else if figure}
-		{#if figure.isUrl}
-			<img src={figure.value} alt={figure.name} class="size-6" />
-		{:else}
-			<Icon name={figure.value} class="size-6" />
-		{/if}
-		<p>{figure.name}</p>
+		</SelectEnum>
+	{:else}
+		<div class="h-4 w-4" style="background-color: {color};"></div>
+		<p>{color}</p>
 	{/if}
 	{#if true || $p2p.peer?.id !== id}
 		<Icon name={isReady ? icons.ready : icons.unready} class="!text-[3rem]" />

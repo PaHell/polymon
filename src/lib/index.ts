@@ -1,17 +1,51 @@
 // place files you want to import through the `$lib` alias in this folder.
 
+import { writable } from "svelte/store";
+
+export enum TurnPhase {
+      PreRoll,    // Player can trade/build/sell
+      PostRoll,   // Can buy property, build, trade
+      Auction,    // Auction phase
+}
+
 export enum FieldType {
-      Go,
-      Street,
-      CommunityChest,
-      IncomeTax,
-      Railroad,
-      Chance,
-      Jail,
-      Utility,
-      FreeParking,
-      GoToJail,
-      LuxuryTax,
+      Go = "go",
+      Street = "street",
+      CommunityChest = "community-chest",
+      IncomeTax = "income-tax",
+      Railroad = "railroad",
+      Chance = "chance",
+      Jail = "jail",
+      Utility = "utility",
+      FreeParking = "free-parking",
+      GoToJail = "go-to-jail",
+      LuxuryTax = "luxury-tax",
+}
+
+export enum GameEventType {
+      // PreRoll
+      TradeOffer,
+      TradeAccept,
+      TradeReject,
+      MortgageProperty,
+      UnmortgageProperty,
+      UseJailCard,
+      BuildHouse,
+      SellHouse,
+      BuildHotel,
+      SellHotel,
+      // DiceRolled
+      RollDice,
+      // PostMove (+ everything from PreRoll)
+      BuyLandedProperty,
+      StartAuction,
+      // Auction
+      AuctionBid,
+      AuctionLeave,
+      // EndTurn
+      EndTurn,
+      DeclareBankruptcy,
+      DeclareWinner,
 }
 
 export const fieldTypeClassMap: Record<FieldType, string> = {
@@ -54,8 +88,7 @@ export type Field =
             toPay: number;
       } | {
             type: FieldType.IncomeTax;
-            toPayFixed: number;
-            toPayPercentage: number;
+            toPay: number;
       };
 
 export const fieldTypeOrder = [
@@ -104,7 +137,7 @@ export const fieldTypeOrder = [
       FieldType.Street,
 ];
 
-export const streetColorOrder: (keyof App.Data.Theme["properties"]["streets"])[] = [
+export const streetColorOrder: (keyof App.Data.Theme.Model["properties"]["streets"])[] = [
       "brown",
       "lightBlue",
       "pink",
@@ -115,29 +148,71 @@ export const streetColorOrder: (keyof App.Data.Theme["properties"]["streets"])[]
       "darkBlue",
 ];
 
-export const pricesByIndex: Record<number, number> = {
-      1: 60, 3: 60,
-      6: 100, 8: 100, 9: 120,
-      11: 140, 13: 140, 14: 160,
-      16: 180, 18: 180, 19: 200,
-      21: 220, 23: 220, 24: 240,
-      26: 260, 27: 260, 29: 280,
-      31: 300, 32: 300, 34: 320,
-      37: 350, 39: 400,
-      5: 200, 15: 200, 25: 200, 35: 200,  // Stations
-      12: 150, 28: 150,                  // Utilities
-};
+export const defaultGameSettings: App.Data.Game.Settings = {
+      startingBalance: 1500,
+      goSalary: 200,
+      incomeTax: 200,
+      luxuryTax: 100,
+      maxTurnsInJail: 3,
+      throwsPerTurnInJail: 3,
+      jailExitPrice: 50,
+      houses: {
+            pricePerStreet: [
+                  50, // brown
+                  50, // lightBlue
+                  100, // pink
+                  100, // orange
+                  150, // red
+                  150, // yellow
+                  200, // green
+                  200, // darkBlue
+            ],
+            totalAmount: 32
+      },
+      hotels: {
+            pricePerStreet: [
+                  50, // brown
+                  50, // lightBlue
+                  100, // pink
+                  100, // orange
+                  150, // red
+                  150, // yellow
+                  200, // green
+                  200, // darkBlue
+            ],
+            housesRequired: 4,
+            totalAmount: 12
+      },
+      priceRailroads: [200, 200, 200, 200],
+      priceUtilities: [150, 150],
+      priceStreets: [
+            [60, 60],
+            [100, 100, 120],
+            [140, 140, 160],
+            [180, 180, 200],
+            [220, 220, 240],
+            [260, 260, 280],
+            [300, 300, 320],
+            [350, 400],
+      ],
+      auction: {
+            startingPrice: 50,
+            minBidIncrement: 10
+      },
+      mortgage: {
+            interestRatePercentage: 10,
+            loanPercentage: 50
+      }
+}
 
-export const payIncomeTaxFixed = 200;
-export const payIncomeTaxPercentage = 0.1;
-export const payLuxuryTax = 100;
-export const earnGo = 200;
+export const settings = writable<App.Data.Game.Settings>(defaultGameSettings);
 
-export const botNames: App.Data.Bot["name"][] = [
+export const botNames: App.Data.Game.Bot["name"][] = [
       "Charles Ponzi",
       "Bernie Madoff",
       "Victor Lustig",
       "Allen Stanford",
+      "Donald Trump",
       "Elizabeth Holmes",
       "Sam Bankman-Fried",
       "Ruja Ignatova",
@@ -145,41 +220,26 @@ export const botNames: App.Data.Bot["name"][] = [
       "Jan Marsalek",
 ];
 
-export const figures: App.Data.Figure[] = [
-      {
-            id: "1",
-            name: "Plane",
-            value: "flight-takeoff-line",
-            isUrl: false
-      },
-      {
-            id: "2",
-            name: "Boat",
-            value: "ship-2-line",
-            isUrl: false
-      },
-      {
-            id: "3",
-            name: "Truck",
-            value: "truck-line",
-            isUrl: false
-      },
-      {
-            id: "4",
-            name: "Shopping Cart",
-            value: "shopping-cart-line",
-            isUrl: false
-      },
-      {
-            id: "5",
-            name: "Bike",
-            value: "bike-line",
-            isUrl: false
-      },
-      {
-            id: "6",
-            name: "Human",
-            value: "run-line",
-            isUrl: false
-      },
-];
+export enum PlayerColor {
+      Red,
+      Blue,
+      Green,
+      Yellow,
+      Orange,
+      Purple,
+      Brown,
+      Pink,
+      Gray
+}
+
+export const colors: Record<PlayerColor, string> = {
+      [PlayerColor.Red]: "#FF0000",
+      [PlayerColor.Blue]: "#0000FF",
+      [PlayerColor.Green]: "#00FF00",
+      [PlayerColor.Yellow]: "#FFFF00",
+      [PlayerColor.Orange]: "#FFA500",
+      [PlayerColor.Purple]: "#800080",
+      [PlayerColor.Brown]: "#A52A2A",
+      [PlayerColor.Pink]: "#FFC0CB",
+      [PlayerColor.Gray]: "#808080",
+}

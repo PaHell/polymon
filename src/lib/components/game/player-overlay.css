@@ -1,0 +1,65 @@
+@reference "$lib/../app.css";
+
+#players-overlay {
+	@apply pointer-events-none fixed top-0 left-0 z-40 grid h-full w-full grid-cols-[auto_1fr_auto];
+	& > div {
+		@apply my-4 flex flex-col justify-center space-y-4;
+		&:nth-child(1) {
+			& > .player {
+				@apply -translate-x-[calc(min(288px,_80vw)_-_64px)] rounded-e-lg;
+				& > header {
+					@apply top-0 left-[calc(min(288px,_80vw))] origin-top-left rotate-90;
+				}
+				& > main {
+					@apply ps-[8px] pe-[64px];
+				}
+			}
+		}
+		&:nth-child(2) {
+			@apply col-start-3;
+			& > .player {
+				@apply translate-x-[calc(min(288px,_80vw)_-_64px)] rounded-s-lg;
+				& > header {
+					@apply bottom-0 left-[64px] origin-bottom-left -rotate-90;
+				}
+				& > main {
+					@apply ps-[64px] pe-[8px];
+				}
+			}
+		}
+		& > .player {
+			@apply pointer-events-auto relative w-[288px] max-w-[80vw] overflow-hidden bg-gray-100 text-black shadow transition-all duration-300;
+			&.active {
+				& > header > .player-turn-order {
+					@apply bg-black text-white;
+				}
+			}
+			&:hover {
+				@apply translate-x-0 shadow-lg;
+			}
+			& > header {
+				@apply absolute flex h-[64px] origin-top-left items-center space-x-[8px] px-[16px];
+				& > .player-color {
+					@apply size-[32px] shrink-0 rounded border-[2px] border-black;
+				}
+				& > .player-turn-order,
+				& > .player-username,
+				& > .player-balance {
+					@apply truncate;
+				}
+				& > .player-turn-order {
+					@apply size-[24px] rounded-full bg-gray-300 text-center text-xl text-[16px] leading-[23px] font-semibold text-gray-500 uppercase;
+				}
+				& > .player-username {
+					@apply flex-1 text-[18px] font-semibold;
+				}
+				& > .player-balance {
+					@apply font-mono text-[20px] font-bold tracking-wide;
+				}
+			}
+			& > main {
+				@apply overflow-auto p-[8px] text-xs;
+			}
+		}
+	}
+}

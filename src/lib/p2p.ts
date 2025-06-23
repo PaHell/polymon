@@ -11,12 +11,17 @@ type P2PMessage =
 
 const RESPONSE_TIMEOUT = 5000;
 
+type Identification = {
+      username: string;
+      seed: string;
+};
+
 export type P2P = {
       isHost: boolean;
       connectedLobbyCode: string | undefined;
       peer: Peer | null;
       connections: DataConnection[];
-      identities: Record<string, string>;
+      identities: Record<string, Identification>;
 }
 
 export const p2p = function () {
@@ -137,14 +142,17 @@ export const p2p = function () {
 
                         update((state) => {
                               if (!state.peer) throw new Error('Peer not initialized');
-                              state.identities[state.peer.id] = get(username) || 'You'
+                              state.identities[state.peer.id] = {
+                                    username: get(username) || 'You',
+                                    seed: crypto.randomUUID()
+                              }
                               return state;
                         });
 
                         // Handle incoming identity payloads
-                        p2p.registerHandler<string, void>('identify', async (name, peerId) => {
+                        p2p.registerHandler<Identification, void>('identify', async (obj, peerId) => {
                               update((state) => {
-                                    state.identities[peerId] = name;
+                                    state.identities[peerId] = obj;
                                     return state;
                               });
                         });
@@ -169,15 +177,18 @@ export const p2p = function () {
                                     return state;
                               });
                         });
-                        state.identities[state.peer.id] = get(username) || 'You'
+                        state.identities[state.peer.id] = {
+                              username: get(username) || 'You',
+                              seed: crypto.randomUUID()
+                        }
                         return state;
                   });
 
 
                   // Handle incoming identity payloads
-                  p2p.registerHandler<string, void>('identify', async (name, peerId) => {
+                  p2p.registerHandler<Identification, void>('identify', async (obj, peerId) => {
                         update((state) => {
-                              state.identities[peerId] = name;
+                              state.identities[peerId] = obj;
                               return state;
                         });
                   });
@@ -217,7 +228,7 @@ export const p2p = function () {
 
             sendRequest: function <In, Out>(action: string, peer: string, payload?: In): Promise<Out> {
                   const state = get(store);
-                  if (!state.connections.length || !state.peer) throw new Error('No active connection');
+                  if (!state.peer) throw new Error('Peer not initialized');
                   const conn = state.connections.find(c => c.peer === peer);
                   if (!conn) throw new Error(`Connection with ID ${peer} not found`);
                   const id = crypto.randomUUID();
@@ -242,7 +253,7 @@ export const p2p = function () {
 
             broadcastRequest: function <In, Out>(action: string, payload?: In): Promise<Out[]> {
                   const state = get(store);
-                  if (!state.connections.length || !state.peer) throw new Error('No active connections');
+                  if (!state.peer) throw new Error('Peer not initialized');
                   const id = crypto.randomUUID();
                   const message: P2PMessage = { type: 'request', id, action, payload };
 
