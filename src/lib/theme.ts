@@ -43,46 +43,30 @@ export const themes: App.Data.Theme.Model[] = [
                         { name: "Fenchurch St. Station", image: "/themes/default/railroad.svg", background: "" },
                         { name: "Liverpool St. Station", image: "/themes/default/railroad.svg", background: "" }
                   ],
-                  streets: {
-                        brown: [
-                              { name: "Old Kent Road", background: "" },
-                              { name: "Whitechapel Road", background: "" }
-                        ],
-                        lightBlue: [
-                              { name: "The Angel, Islington", background: "" },
-                              { name: "Euston Road", background: "" },
-                              { name: "Pentonville Road", background: "" }
-                        ],
-                        pink: [
-                              { name: "Pall Mall", background: "" },
-                              { name: "Whitehall", background: "" },
-                              { name: "Northumbrlnd Avenue", background: "" }
-                        ],
-                        orange: [
-                              { name: "Bow Street", background: "" },
-                              { name: "Marlborough Street", background: "" },
-                              { name: "Vine Street", background: "" }
-                        ],
-                        red: [
-                              { name: "Strand", background: "" },
-                              { name: "Fleet Street", background: "" },
-                              { name: "Trafalgar Square", background: "" }
-                        ],
-                        yellow: [
-                              { name: "Leicester Square", background: "" },
-                              { name: "Coventry Street", background: "" },
-                              { name: "Piccadilly", background: "" }
-                        ],
-                        green: [
-                              { name: "Regent Street", background: "" },
-                              { name: "Oxford Street", background: "" },
-                              { name: "Bond Street", background: "" }
-                        ],
-                        darkBlue: [
-                              { name: "Park Lane", background: "" },
-                              { name: "Mayfair", background: "" }
-                        ]
-                  },
+                  streets: [
+                        { name: "Old Kent Road", background: "" },
+                        { name: "Whitechapel Road", background: "" },
+                        { name: "The Angel, Islington", background: "" },
+                        { name: "Euston Road", background: "" },
+                        { name: "Pentonville Road", background: "" },
+                        { name: "Pall Mall", background: "" },
+                        { name: "Whitehall", background: "" },
+                        { name: "Northumbrlnd Avenue", background: "" },
+                        { name: "Bow Street", background: "" },
+                        { name: "Marlborough Street", background: "" },
+                        { name: "Vine Street", background: "" },
+                        { name: "Strand", background: "" },
+                        { name: "Fleet Street", background: "" },
+                        { name: "Trafalgar Square", background: "" },
+                        { name: "Leicester Square", background: "" },
+                        { name: "Coventry Street", background: "" },
+                        { name: "Piccadilly", background: "" },
+                        { name: "Regent Street", background: "" },
+                        { name: "Oxford Street", background: "" },
+                        { name: "Bond Street", background: "" },
+                        { name: "Park Lane", background: "" },
+                        { name: "Mayfair", background: "" }
+                  ],
                   communityChest: {
                         name: "Community Chest",
                         imageField: "/themes/default/community-chest-field.svg",
@@ -148,46 +132,30 @@ export const themes: App.Data.Theme.Model[] = [
                         { name: "Hamburg Hafen", image: "/themes/default/railroad.svg", background: "" },
                         { name: "Munich Megabau", image: "/themes/default/railroad.svg", background: "" }
                   ],
-                  streets: {
-                        brown: [
-                              { name: "Zukunftsquartier Innsbruck", background: "#3d2b1f" },
-                              { name: "Karstadt-Ruine", background: "#5c4033" }
-                        ],
-                        lightBlue: [
-                              { name: "SIGNA Holding HQ", background: "#a3cde8" },
-                              { name: "Benko Private Trust", background: "#b3d9f7" },
-                              { name: "Alpine Bau GmbH", background: "#bce0f9" }
-                        ],
-                        pink: [
-                              { name: "Credit Line Expansion", background: "#e6b3d1" },
-                              { name: "Softbank Pitch", background: "#d68fb3" },
-                              { name: "Middle East Loan", background: "#e2a9c0" }
-                        ],
-                        orange: [
-                              { name: "Wiener Luxusresidenz", background: "#f5d76e" },
-                              { name: "Hamburg Elbtor", background: "#f3c13a" },
-                              { name: "Kaufhaus Tyrol", background: "#ffd700" }
-                        ],
-                        red: [
-                              { name: "Projekt Verzug", background: "#ff4c4c" },
-                              { name: "Banken-Alarm", background: "#d11a2a" },
-                              { name: "Staatsrettung", background: "#ff3333" }
-                        ],
-                        yellow: [
-                              { name: "Goldene Fassade", background: "#ffeb99" },
-                              { name: "VIP Rooftop Bar", background: "#fff275" },
-                              { name: "Champagner Lobby", background: "#ffe066" }
-                        ],
-                        green: [
-                              { name: "Alsterhaus", background: "#7fbf7f" },
-                              { name: "KaDeWe Berlin", background: "#5ca86b" },
-                              { name: "Park Hyatt Vienna", background: "#3b8c5a" }
-                        ],
-                        darkBlue: [
-                              { name: "SIGNA Prime", background: "#0a0a0a" },
-                              { name: "Benko Penthouse", background: "#1a1a1a" }
-                        ]
-                  },
+                  streets: [
+                        { name: "Zukunftsquartier Innsbruck", background: "#3d2b1f" },
+                        { name: "Karstadt-Ruine", background: "#5c4033" },
+                        { name: "SIGNA Holding HQ", background: "#a3cde8" },
+                        { name: "Benko Private Trust", background: "#b3d9f7" },
+                        { name: "Alpine Bau GmbH", background: "#bce0f9" },
+                        { name: "Credit Line Expansion", background: "#e6b3d1" },
+                        { name: "Softbank Pitch", background: "#d68fb3" },
+                        { name: "Middle East Loan", background: "#e2a9c0" },
+                        { name: "Wiener Luxusresidenz", background: "#f5d76e" },
+                        { name: "Hamburg Elbtor", background: "#f3c13a" },
+                        { name: "Kaufhaus Tyrol", background: "#ffd700" },
+                        { name: "Projekt Verzug", background: "#ff4c4c" },
+                        { name: "Banken-Alarm", background: "#d11a2a" },
+                        { name: "Staatsrettung", background: "#ff3333" },
+                        { name: "Goldene Fassade", background: "#ffeb99" },
+                        { name: "VIP Rooftop Bar", background: "#fff275" },
+                        { name: "Champagner Lobby", background: "#ffe066" },
+                        { name: "Alsterhaus", background: "#7fbf7f" },
+                        { name: "KaDeWe Berlin", background: "#5ca86b" },
+                        { name: "Park Hyatt Vienna", background: "#3b8c5a" },
+                        { name: "SIGNA Prime", background: "#0a0a0a" },
+                        { name: "Benko Penthouse", background: "#1a1a1a" },
+                  ],
                   communityChest: { name: "Investor Mailbox", imageField: "/themes/default/community-chest.svg", imageCard: "/themes/default/community-chest.svg", styleCard: "", background: "" },
                   chance: { name: "Market Volatility", imageField: "/themes/default/chance.svg", imageCard: "/themes/default/chance.svg", styleCard: "", background: "" },
                   incomeTax: { name: "Real Estate Tax", image: "/themes/default/income-tax.svg", background: "" },

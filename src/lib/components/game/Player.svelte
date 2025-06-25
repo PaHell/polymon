@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { colors, FieldType, fieldTypeOrder, settings } from '$lib';
+	import { colors, FieldType, getStreetIndex } from '$lib';
 	import { engine, getFieldTypeIndex } from '$lib/engine';
 	import { p2p } from '$lib/p2p';
 	import { theme } from '$lib/theme';
+	import { get } from 'svelte/store';
 	import Button from '../general/Button.svelte';
 	import Checkbox from '../general/Checkbox.svelte';
 	import Input from '../general/Input.svelte';
@@ -48,6 +49,24 @@
 		<h4 class="player-balance">{$theme.currency}{player.balance}</h4>
 	</header>
 	<main>
+		{#each $engine.railroads.filter((p) => p.ownerId === player.id) as railroad (railroad.id)}
+			<div class="railroad" style="background-color: gray;">
+				{$theme.properties.railroads[Number(railroad.id.split('-')[1])].name}
+			</div>
+		{/each}
+		{#each $engine.utilities.filter((p) => p.ownerId === player.id) as utility (utility.id)}
+			<div class="utility" style="background-color: black;">
+				{$theme.properties.utilities[Number(utility.id.split('-')[1])].name}
+			</div>
+		{/each}
+		{#each $engine.streets.filter((p) => p.ownerId === player.id) as street (street.id)}
+			<div
+				class="street"
+				style="background-color: {$theme.colors.streets[getStreetIndex(engine.board, street.id)]};"
+			>
+				{$theme.properties.streets[Number(street.id.split('-')[1])].name}
+			</div>
+		{/each}
 		<p>UserID: {player.id}</p>
 		<p>Color: {player.color}</p>
 		<p>Username: {identity?.username}</p>

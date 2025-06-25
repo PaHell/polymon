@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { colors, FieldType, fieldTypeOrder } from '$lib';
+	import { boardConfigs, colors, FieldType } from '$lib';
 	import { engine } from '$lib/engine';
 	import { p2p } from '$lib/p2p';
 	import { theme } from '$lib/theme';
 	import { on } from 'svelte/events';
+	import { get } from 'svelte/store';
 
 	let player: App.Data.GameState.Player = $props();
 
@@ -27,7 +28,7 @@
 		let _left = fieldRect.left + fieldRect.width / 2 - figureRect.width / 2;
 		const side = Math.trunc(player.position / 10);
 		// Special Positions
-		if (fieldTypeOrder[player.position] === FieldType.Jail) {
+		if (engine.board.fieldTypeOrder[player.position] === FieldType.Jail) {
 			if (player.isInJail) {
 				// If the player is in jail, position the figure on the jail field
 				_top = _top + 5 + Math.trunc(playerIndex / 2) * (figureRect.height + 2);

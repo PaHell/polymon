@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		FieldType,
-		fieldTypeOrder,
-		PlayerColor,
-		settings,
-		streetColorOrder,
-		type Field
-	} from '$lib';
+	import { defaultGameSettings, FieldType, PlayerColor } from '$lib';
 	import Board from '$lib/components/game/Board.svelte';
 	import GameField from '$lib/components/game/GameField.svelte';
 	import Player from '$lib/components/game/Player.svelte';
@@ -50,7 +43,7 @@
 					}
 				],
 				[],
-				$settings
+				defaultGameSettings
 			)
 			.then((result) => {
 				playerLastDices = Object.entries(result.dices).reduce(
@@ -65,50 +58,10 @@
 				throw new Error(`Failed to initialize the game engine: ${error}`);
 			});
 	}
-	const _settings = get(settings);
-	const fields = fieldTypeOrder.map((type, i) => {
-		const fieldTypeIndex = getFieldTypeIndex(type, i);
-		switch (type) {
-			case FieldType.Go:
-				return { type, toEarn: _settings.goSalary } satisfies Field;
-			case FieldType.Street:
-				return {
-					type,
-					name: 'street-' + fieldTypeIndex,
-					price: $settings.priceStreets.flatMap((s) => s)[fieldTypeIndex],
-					color: streetColorOrder[fieldTypeIndex]
-				} satisfies Field;
-			case FieldType.CommunityChest:
-			case FieldType.Chance:
-			case FieldType.Jail:
-			case FieldType.GoToJail:
-			case FieldType.FreeParking:
-				return { type } satisfies Field;
-			case FieldType.Railroad:
-				return {
-					type,
-					name: 'railroad-' + (i + 1),
-					price: $settings.priceRailroads[fieldTypeIndex]
-				} satisfies Field;
-			case FieldType.Utility:
-				return {
-					type,
-					name: 'utility-' + (i + 1),
-					price: $settings.priceUtilities[fieldTypeIndex]
-				} satisfies Field;
-			case FieldType.IncomeTax:
-				return {
-					type,
-					toPay: _settings.incomeTax
-				} satisfies Field;
-			case FieldType.LuxuryTax:
-				return { type, toPay: _settings.luxuryTax } satisfies Field;
-		}
-	});
 </script>
 
 {#if $engine}
-	<Board {fields} />
+	<Board />
 	<PlayersOverlay />
 	<StateOverlay />
 {/if}

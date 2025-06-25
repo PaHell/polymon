@@ -1,13 +1,5 @@
 // place files you want to import through the `$lib` alias in this folder.
 
-import { writable } from "svelte/store";
-
-export enum TurnPhase {
-      PreRoll,    // Player can trade/build/sell
-      PostRoll,   // Can buy property, build, trade
-      Auction,    // Auction phase
-}
-
 export enum FieldType {
       Go = "go",
       Street = "street",
@@ -20,6 +12,74 @@ export enum FieldType {
       FreeParking = "free-parking",
       GoToJail = "go-to-jail",
       LuxuryTax = "luxury-tax",
+}
+
+export const boardConfigs: App.Data.Game.BoardConfig[] = [
+      {
+            id: "default",
+            name: "Classic",
+            lengthX: 10,
+            streetLengths: [
+                  2, // brown
+                  3, // lightBlue
+                  3, // pink
+                  3, // orange
+                  3, // red
+                  3, // yellow
+                  3, // green
+                  2, // darkBlue
+            ],
+            fieldTypeOrder: [
+                  FieldType.Go,
+                  FieldType.Street,
+                  FieldType.CommunityChest,
+                  FieldType.Street,
+                  FieldType.IncomeTax,
+                  FieldType.Railroad,
+                  FieldType.Street,
+                  FieldType.Chance,
+                  FieldType.Street,
+                  FieldType.Street,
+
+                  FieldType.Jail,
+                  FieldType.Street,
+                  FieldType.Utility,
+                  FieldType.Street,
+                  FieldType.Street,
+                  FieldType.Railroad,
+                  FieldType.Street,
+                  FieldType.CommunityChest,
+                  FieldType.Street,
+                  FieldType.Street,
+
+                  FieldType.FreeParking,
+                  FieldType.Street,
+                  FieldType.Chance,
+                  FieldType.Street,
+                  FieldType.Street,
+                  FieldType.Railroad,
+                  FieldType.Street,
+                  FieldType.Street,
+                  FieldType.Utility,
+                  FieldType.Street,
+
+                  FieldType.GoToJail,
+                  FieldType.Street,
+                  FieldType.Street,
+                  FieldType.CommunityChest,
+                  FieldType.Street,
+                  FieldType.Railroad,
+                  FieldType.Chance,
+                  FieldType.Street,
+                  FieldType.LuxuryTax,
+                  FieldType.Street,
+            ]
+      }];
+
+export enum TurnPhase {
+      PreRoll,    // Player can trade/build/sell
+      PostRoll,   // Can buy property, build, trade
+      Auction,    // Auction phase
 }
 
 export enum GameEventType {
@@ -62,93 +122,47 @@ export const fieldTypeClassMap: Record<FieldType, string> = {
       [FieldType.LuxuryTax]: "luxury-tax",
 };
 
-export type StreetField = {
-      type: FieldType.Street;
-      name: string;
-      color: string;
-      price: number;
-};
+export function getStreetIndex(board: App.Data.Game.BoardConfig, streetId: App.Data.GameState.Street["id"]): number {
+      const index = Number(streetId.split("-")[1]);
+      let count = 0;
 
-export type Field =
-      {
-            type: FieldType.Go;
-            toEarn: number;
-      } | StreetField | {
-            type: FieldType.CommunityChest | FieldType.Chance | FieldType.Jail | FieldType.GoToJail | FieldType.FreeParking;
-      } | {
-            type: FieldType.Railroad;
-            name: string;
-            price: number;
-      } | {
-            type: FieldType.Utility;
-            name: string;
-            price: number;
-      } | {
-            type: FieldType.LuxuryTax;
-            toPay: number;
-      } | {
-            type: FieldType.IncomeTax;
-            toPay: number;
-      };
+      for (let i = 0; i < board.streetLengths.length; i++) {
+            count += board.streetLengths[i];
+            if (index < count) {
+                  return i;
+            }
+      }
+      return -1;
+}
 
-export const fieldTypeOrder = [
-      FieldType.Go,
-      FieldType.Street,
-      FieldType.CommunityChest,
-      FieldType.Street,
-      FieldType.IncomeTax,
-      FieldType.Railroad,
-      FieldType.Street,
-      FieldType.Chance,
-      FieldType.Street,
-      FieldType.Street,
+export function getSideIndex(board: App.Data.Game.BoardConfig, index: number): number {
+      const lengthX = board.lengthX;
+      const lengthY = (board.fieldTypeOrder.length - 2 * lengthX) / 2;
+      return index < lengthX
+            ? 0
+            : index < lengthX + lengthY
+                  ? 1
+                  : index < 2 * lengthX + lengthY
+                        ? 2
+                        : 3;
+}
 
-      FieldType.Jail,
-      FieldType.Street,
-      FieldType.Utility,
-      FieldType.Street,
-      FieldType.Street,
-      FieldType.Railroad,
-      FieldType.Street,
-      FieldType.CommunityChest,
-      FieldType.Street,
-      FieldType.Street,
-
-      FieldType.FreeParking,
-      FieldType.Street,
-      FieldType.Chance,
-      FieldType.Street,
-      FieldType.Street,
-      FieldType.Railroad,
-      FieldType.Street,
-      FieldType.Street,
-      FieldType.Utility,
-      FieldType.Street,
-
-      FieldType.GoToJail,
-      FieldType.Street,
-      FieldType.Street,
-      FieldType.CommunityChest,
-      FieldType.Street,
-      FieldType.Railroad,
-      FieldType.Chance,
-      FieldType.Street,
-      FieldType.LuxuryTax,
-      FieldType.Street,
-];
-
-export const streetColorOrder: (keyof App.Data.Theme.Model["properties"]["streets"])[] = [
-      "brown",
-      "lightBlue",
-      "pink",
-      "orange",
-      "red",
-      "yellow",
-      "green",
-      "darkBlue",
-];
+export function getFieldIndexOnSide(board: App.Data.Game.BoardConfig, index: number): number {
+      const lengthX = board.lengthX;
+      const lengthY = (board.fieldTypeOrder.length - 2 * lengthX) / 2;
+      if (index < lengthX) {
+            return index; // Top side
+      } else if (index < lengthX + lengthY) {
+            return index - lengthX; // Right side
+      } else if (index < (2 * lengthX) + lengthY) {
+            return index - lengthX - lengthY; // Bottom side
+      } else {
+            return index - (2 * lengthX) - lengthY; // Left side
+      }
+}
 
 export const defaultGameSettings: App.Data.Game.Settings = {
+      boardId: "default",
       startingBalance: 1500,
       goSalary: 200,
       incomeTax: 200,
@@ -167,7 +181,8 @@ export const defaultGameSettings: App.Data.Game.Settings = {
                   200, // green
                   200, // darkBlue
             ],
-            totalAmount: 32
+            totalAmount: 32,
+            sellPricePercentage: 50,
       },
       hotels: {
             pricePerStreet: [
@@ -181,19 +196,20 @@ export const defaultGameSettings: App.Data.Game.Settings = {
                   200, // darkBlue
             ],
             housesRequired: 4,
-            totalAmount: 12
+            totalAmount: 12,
+            sellPricePercentage: 50,
       },
       priceRailroads: [200, 200, 200, 200],
       priceUtilities: [150, 150],
       priceStreets: [
-            [60, 60],
-            [100, 100, 120],
-            [140, 140, 160],
-            [180, 180, 200],
-            [220, 220, 240],
-            [260, 260, 280],
-            [300, 300, 320],
-            [350, 400],
+            60, 60,
+            100, 100, 120,
+            140, 140, 160,
+            180, 180, 200,
+            220, 220, 240,
+            260, 260, 280,
+            300, 300, 320,
+            350, 400,
       ],
       auction: {
             startingPrice: 50,
@@ -204,8 +220,6 @@ export const defaultGameSettings: App.Data.Game.Settings = {
             loanPercentage: 50
       }
 }
-
-export const settings = writable<App.Data.Game.Settings>(defaultGameSettings);
 
 export const botNames: App.Data.Game.Bot["name"][] = [
       "Charles Ponzi",

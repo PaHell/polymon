@@ -1,4 +1,4 @@
-import { FieldType, fieldTypeOrder, GameEventType, TurnPhase } from "$lib";
+import { boardConfigs, defaultGameSettings, FieldType, GameEventType, TurnPhase } from "$lib";
 import { get, writable } from "svelte/store";
 
 async function sha256Hash(str: string): Promise<string> {
@@ -136,10 +136,10 @@ function getPropertyOwner(state: App.Data.GameState.Model, propertyId: App.Data.
       return null;
 }
 
-export function getFieldTypeIndex(fieldType: FieldType, position: number): number {
-      let fieldIndex = 0;
+export function getFieldTypeIndex(board: App.Data.Game.BoardConfig, fieldType: FieldType, position: number): number {
+      let fieldIndex = -1;
       for (let i = 0; i <= position; i++) {
-            if (fieldTypeOrder[i] === fieldType) {
+            if (board.fieldTypeOrder[i] === fieldType) {
                   fieldIndex++;
             }
       }
@@ -209,11 +209,15 @@ function setPropertyOwner(state: App.Data.GameState.Model, propertyId: App.Data.
 
 export const engine = function () {
       const store = writable<App.Data.GameState.Model>();
-      const settings = writable<App.Data.Game.Settings>();
+      let settings = defaultGameSettings;
+      let board = boardConfigs[0];
       return {
             subscribe: store.subscribe,
+            settings,
+            board,
             initialize: async (players: App.Data.Game.Player[], bots: App.Data.Game.Bot[], _settings: App.Data.Game.Settings): Promise<App.Data.GameState.GameStartResult> => {
-                  settings.set(_settings);
+                  settings = _settings;
+                  board = boardConfigs.find(b => b.id === _settings.boardId) || boardConfigs[0];
                   const hash = await sha256Hash(players.map(i => i.seed).join(","));
                   const playerDices = getDicesFromHash(hash, players.length + bots.length).reduce((acc, dice, index) => {
                         const playerId = index < players.length ? players[index].id : bots[index - players.length].id;
@@ -284,7 +288,7 @@ export const engine = function () {
                                     if (player.id !== playerId) return player;
                                     return {
                                           ...player,
-                                          position: (player.position + dice1 + dice2) % fieldTypeOrder.length,
+                                          position: (player.position + dice1 + dice2) % board.fieldTypeOrder.length,
                                     }
                               }),
                               turnPhase: TurnPhase.PostRoll,
@@ -294,21 +298,24 @@ export const engine = function () {
             },
             buyLandedProperty: (playerId: App.Data.GameState.Player["id"]): boolean => {
                   const state = get(store);
-                  const _settings = get(settings);
                   console.log("Buy Landed Property for player:", playerId);
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.BuyLandedProperty)) return false;
                   console.log("Checking if player can buy landed property");
                   const player = state.players.find(p => p.id === playerId)!;
-                  const fieldType = fieldTypeOrder[player.position];
-                  const fieldIndex = getFieldTypeIndex(fieldType, player.position);
+                  const fieldType = board.fieldTypeOrder[player.position];
+                  const fieldIndex = getFieldTypeIndex(board, fieldType, player.position);
                   console.log("Field Type:", fieldType, "Field Index:", fieldIndex);
                   if (fieldIndex === -1) return false;
+                  if ([FieldType.Street, FieldType.Railroad, FieldType.Utility].indexOf(fieldType) === -1) {
+                        console.log("Field is not purchasable:", fieldType);
+                        return false;
+                  }
                   const propertyId = fieldType + ("-" + fieldIndex);
                   const owner = getPropertyOwner(state, propertyId);
                   if (owner) return false;
                   console.log("Checking if property is purchasable");
-                  const price = getFieldPrice(_settings, fieldType, fieldIndex);
+                  const price = getFieldPrice(settings, fieldType, fieldIndex);
                   if (player.balance < price) return false;
                   console.log("Player can buy property:", propertyId, "for price:", price);
                   store.update(currentState => {
@@ -324,8 +331,8 @@ export const engine = function () {
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.StartAuction)) return false;
                   const player = state.players.find(p => p.id === playerId)!;
-                  const fieldType = fieldTypeOrder[player.position];
-                  const fieldIndex = getFieldTypeIndex(fieldType, player.position);
+                  const fieldType = board.fieldTypeOrder[player.position];
+                  const fieldIndex = getFieldTypeIndex(board, fieldType, player.position);
                   if (fieldIndex === -1) return false;
                   const propertyId = fieldType + ("-" + fieldIndex);
                   const propertyOwner = getPropertyOwner(state, propertyId);
@@ -339,16 +346,15 @@ export const engine = function () {
             },
             buyHouseForProperty: (playerId: App.Data.GameState.Player["id"], propertyId: App.Data.GameState.Railroad["id"]): boolean => {
                   const state = get(store);
-                  const _settings = get(settings);
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.BuildHouse)) return false;
                   const player = state.players.find(p => p.id === playerId)!;
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
-                  if (!street || street.hasHotel || street.amountOfHouses >= _settings.hotels.housesRequired) return false;
-                  const fieldTypeIndex = getFieldTypeIndex(FieldType.Street, Number(street.id.split("-")[1]));
-                  const price = _settings.priceStreets.flatMap(s => s)[fieldTypeIndex];
+                  if (!street || street.hasHotel || street.amountOfHouses >= settings.hotels.housesRequired) return false;
+                  const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
+                  const price = settings.priceStreets.flatMap(s => s)[fieldTypeIndex];
                   if (player.balance < price) return false;
                   store.update(currentState => {
                         if (!currentState) return currentState;
@@ -360,16 +366,15 @@ export const engine = function () {
             },
             buyHotelForProperty: (playerId: App.Data.GameState.Player["id"], propertyId: App.Data.GameState.Railroad["id"]): boolean => {
                   const state = get(store);
-                  const _settings = get(settings);
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.BuildHotel)) return false;
                   const player = state.players.find(p => p.id === playerId)!;
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
-                  if (!street || street.hasHotel || street.amountOfHouses !== _settings.hotels.housesRequired) return false;
-                  const fieldTypeIndex = getFieldTypeIndex(FieldType.Street, Number(street.id.split("-")[1]));
-                  const price = _settings.hotels.pricePerStreet.flatMap(s => s)[fieldTypeIndex];
+                  if (!street || street.hasHotel || street.amountOfHouses !== settings.hotels.housesRequired) return false;
+                  const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
+                  const price = settings.hotels.pricePerStreet.flatMap(s => s)[fieldTypeIndex];
                   if (player.balance < price) return false;
                   store.update(currentState => {
                         if (!currentState) return currentState;
@@ -382,15 +387,14 @@ export const engine = function () {
             },
             sellHouseForProperty: (playerId: App.Data.GameState.Player["id"], propertyId: App.Data.GameState.Railroad["id"]): boolean => {
                   const state = get(store);
-                  const _settings = get(settings);
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.SellHouse)) return false;
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
                   if (!street || street.amountOfHouses <= 0) return false;
-                  const fieldTypeIndex = getFieldTypeIndex(FieldType.Street, Number(street.id.split("-")[1]));
-                  const price = _settings.priceStreets.flatMap(s => s)[fieldTypeIndex] / 2;
+                  const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
+                  const price = settings.priceStreets.flatMap(s => s)[fieldTypeIndex] / 2;
                   store.update(currentState => {
                         if (!currentState) return currentState;
                         currentState = setPlayerBalance(currentState, playerId, price);
@@ -401,35 +405,33 @@ export const engine = function () {
             },
             sellHotelForProperty: (playerId: App.Data.GameState.Player["id"], propertyId: App.Data.GameState.Railroad["id"]): boolean => {
                   const state = get(store);
-                  const _settings = get(settings);
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.SellHotel)) return false;
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
                   if (!street || !street.hasHotel) return false;
-                  const fieldTypeIndex = getFieldTypeIndex(FieldType.Street, Number(street.id.split("-")[1]));
-                  const price = _settings.hotels.pricePerStreet.flatMap(s => s)[fieldTypeIndex] / 2;
+                  const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
+                  const price = settings.hotels.pricePerStreet.flatMap(s => s)[fieldTypeIndex] / 2;
                   store.update(currentState => {
                         if (!currentState) return currentState;
                         currentState = setPlayerBalance(currentState, playerId, price);
                         currentState.streets.find(s => s.id === propertyId)!.hasHotel = false;
-                        currentState.streets.find(s => s.id === propertyId)!.amountOfHouses = _settings.hotels.housesRequired;
+                        currentState.streets.find(s => s.id === propertyId)!.amountOfHouses = settings.hotels.housesRequired;
                         return currentState;
                   });
                   return true;
             },
             mortgageProperty: (playerId: App.Data.GameState.Player["id"], propertyId: App.Data.GameState.Railroad["id"]): number => {
                   const state = get(store);
-                  const _settings = get(settings);
                   if (!isPlayerAtTurn(state, playerId)) return 0;
                   if (!getLegalMoves(state).includes(GameEventType.MortgageProperty)) return 0;
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return 0;
                   const property = [...state.streets, ...state.railroads, ...state.utilities].find(s => s.id === propertyId);
                   if (!property || property.isMortgaged) return 0;
-                  const fieldTypeIndex = getFieldTypeIndex(property.id.split("-")[0] as FieldType, Number(property.id.split("-")[1]));
-                  const loan = Math.round((getFieldPrice(_settings, property.id.split("-")[0] as FieldType, fieldTypeIndex) * _settings.mortgage.loanPercentage) / 100);
+                  const fieldTypeIndex = getFieldTypeIndex(board, property.id.split("-")[0] as FieldType, Number(property.id.split("-")[1]));
+                  const loan = Math.round((getFieldPrice(settings, property.id.split("-")[0] as FieldType, fieldTypeIndex) * settings.mortgage.loanPercentage) / 100);
                   store.update(currentState => {
                         if (!currentState) return currentState;
                         currentState = setPlayerBalance(currentState, playerId, loan);
@@ -443,16 +445,15 @@ export const engine = function () {
             },
             unmortgageProperty: (playerId: App.Data.GameState.Player["id"], propertyId: App.Data.GameState.Railroad["id"]): boolean => {
                   const state = get(store);
-                  const _settings = get(settings);
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.UnmortgageProperty)) return false;
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const property = [...state.streets, ...state.railroads, ...state.utilities].find(s => s.id === propertyId);
                   if (!property || !property.isMortgaged) return false;
-                  const fieldTypeIndex = getFieldTypeIndex(property.id.split("-")[0] as FieldType, Number(property.id.split("-")[1]));
-                  const loan = Math.round((getFieldPrice(_settings, property.id.split("-")[0] as FieldType, fieldTypeIndex) * _settings.mortgage.loanPercentage) / 100);
-                  const interest = Math.round((loan * _settings.mortgage.interestRatePercentage) / 100);
+                  const fieldTypeIndex = getFieldTypeIndex(board, property.id.split("-")[0] as FieldType, Number(property.id.split("-")[1]));
+                  const loan = Math.round((getFieldPrice(settings, property.id.split("-")[0] as FieldType, fieldTypeIndex) * settings.mortgage.loanPercentage) / 100);
+                  const interest = Math.round((loan * settings.mortgage.interestRatePercentage) / 100);
                   const totalPayment = loan + interest;
                   if (state.players.find(p => p.id === playerId)!.balance < totalPayment) return false;
                   store.update(currentState => {

@@ -1,6 +1,6 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 
-import type { GameEventType, PlayerColor } from "$lib";
+import type { FieldType, GameEventType, PlayerColor } from "$lib";
 import type { TurnPhase } from "$lib/game";
 
 // for information about these interfaces
@@ -19,7 +19,15 @@ declare global {
 					name: string;
 					color: PlayerColor;
 				}
+				type BoardConfig = {
+					id: string;
+					name: string;
+					lengthX: number;
+					streetLengths: number[];
+					fieldTypeOrder: FieldType[];
+				};
 				type Settings = {
+					boardId: string;
 					startingBalance: number;
 					goSalary: number;
 					incomeTax: number;
@@ -28,40 +36,19 @@ declare global {
 					throwsPerTurnInJail: number;
 					jailExitPrice: number;
 					houses: {
-						pricePerStreet: [
-							number, number,
-							number, number,
-							number, number,
-							number, number,
-						];
+						pricePerStreet: number[];
 						totalAmount: number;
+						sellPricePercentage: number;
 					};
 					hotels: {
-						pricePerStreet: [
-							number, number,
-							number, number,
-							number, number,
-							number, number,
-						];
+						pricePerStreet: number[];
 						housesRequired: number;
 						totalAmount: number;
+						sellPricePercentage: number;
 					};
-					priceRailroads: [number, number, number, number];
-					priceUtilities: [number, number];
-					priceStreets: [
-						// top
-						[number, number],
-						[number, number, number],
-						// right
-						[number, number, number],
-						[number, number, number],
-						// bottom
-						[number, number, number],
-						[number, number, number],
-						// left
-						[number, number, number],
-						[number, number],
-					];
+					priceRailroads: number[];
+					priceUtilities: number[];
+					priceStreets: number[];
 					auction: {
 						startingPrice: number;
 						minBidIncrement: number;
@@ -199,7 +186,7 @@ declare global {
 					image: string;
 					background?: string;
 				};
-				type Property = {
+				type Street = {
 					name: string;
 					background?: string;
 				}
@@ -242,16 +229,16 @@ declare global {
 					properties: {
 						utilities: [Utility, Utility];
 						railroads: [Railroad, Railroad, Railroad, Railroad];
-						streets: {
-							brown: [Property, Property];
-							lightBlue: [Property, Property, Property];
-							pink: [Property, Property, Property];
-							orange: [Property, Property, Property];
-							red: [Property, Property, Property];
-							yellow: [Property, Property, Property];
-							green: [Property, Property, Property];
-							darkBlue: [Property, Property];
-						};
+						streets: [
+							Street, Street,
+							Street, Street, Street,
+							Street, Street, Street,
+							Street, Street, Street,
+							Street, Street, Street,
+							Street, Street, Street,
+							Street, Street, Street,
+							Street, Street,
+						];
 						communityChest: CommunityChest;
 						chance: Chance;
 						incomeTax: IncomeTax;

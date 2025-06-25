@@ -1,0 +1,23 @@
+@reference "$lib/../app.css";
+
+.floating {
+	@apply absolute top-0 left-0 z-50 overflow-hidden;
+	& > .floating-arrow {
+		@apply absolute h-[12px] w-[24px] overflow-hidden;
+	}
+	&[class*='floating-placement-top'] > .floating-arrow {
+		@apply mb-[4px] rotate-180;
+	}
+	&[class*='floating-placement-bottom'] > .floating-arrow {
+		@apply mt-[4px];
+	}
+	&[class*='floating-placement-left'] > .floating-arrow {
+		@apply ms-[4px] rotate-90;
+	}
+	&[class*='floating-placement-right'] > .floating-arrow {
+		@apply me-[4px] -rotate-90;
+	}
+	& > .floating-content {
+		@apply m-[16px] rounded-lg border-[2px] border-black bg-gray-50 p-[8px] text-black shadow-lg;
+	}
+}
