@@ -35,8 +35,25 @@ declare global {
 					maxTurnsInJail: number;
 					throwsPerTurnInJail: number;
 					jailExitPrice: number;
+					ownedColorSetRentMultiplier: number;
+					streets: {
+						price: number;
+						rentBase: number;
+						rentPerHouseFixed: number[];
+						rentPerHotelFixed: number[];
+					}[];
+					railroads: {
+						price: number;
+						rent: number;
+						multiplierPerOwned: number[];
+					};
+					utilities: {
+						price: number;
+						rent: number;
+						diceMultiplierPerOwned: number[];
+					};
 					houses: {
-						pricePerStreet: number[];
+						pricePerColorSet: number[];
 						totalAmount: number;
 						sellPricePercentage: number;
 					};
@@ -45,10 +62,8 @@ declare global {
 						housesRequired: number;
 						totalAmount: number;
 						sellPricePercentage: number;
+						maxPerStreet: number;
 					};
-					priceRailroads: number[];
-					priceUtilities: number[];
-					priceStreets: number[];
 					auction: {
 						startingPrice: number;
 						minBidIncrement: number;
@@ -227,18 +242,9 @@ declare global {
 						];
 					};
 					properties: {
-						utilities: [Utility, Utility];
-						railroads: [Railroad, Railroad, Railroad, Railroad];
-						streets: [
-							Street, Street,
-							Street, Street, Street,
-							Street, Street, Street,
-							Street, Street, Street,
-							Street, Street, Street,
-							Street, Street, Street,
-							Street, Street, Street,
-							Street, Street,
-						];
+						utilities: Utility[];
+						railroads: Railroad[];
+						streets: Street[];
 						communityChest: CommunityChest;
 						chance: Chance;
 						incomeTax: IncomeTax;

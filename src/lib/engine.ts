@@ -1,4 +1,4 @@
-import { boardConfigs, defaultGameSettings, FieldType, GameEventType, TurnPhase } from "$lib";
+import { boardConfigs, defaultGameSettings, FieldType, GameEventType, getStreetIndex, TurnPhase } from "$lib";
 import { get, writable } from "svelte/store";
 
 async function sha256Hash(str: string): Promise<string> {
@@ -149,11 +149,11 @@ export function getFieldTypeIndex(board: App.Data.Game.BoardConfig, fieldType: F
 function getFieldPrice(settings: App.Data.Game.Settings, fieldType: FieldType, fieldIndex: number): number {
       switch (fieldType) {
             case FieldType.Street:
-                  return settings.priceStreets.flatMap(s => s)[fieldIndex];
+                  return settings.streets[fieldIndex].price;
             case FieldType.Railroad:
-                  return settings.priceRailroads[fieldIndex];
+                  return settings.railroads.price;
             case FieldType.Utility:
-                  return settings.priceUtilities[fieldIndex];
+                  return settings.utilities.price;
             default:
                   return 0;
       }
@@ -353,8 +353,9 @@ export const engine = function () {
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
                   if (!street || street.hasHotel || street.amountOfHouses >= settings.hotels.housesRequired) return false;
-                  const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
-                  const price = settings.priceStreets.flatMap(s => s)[fieldTypeIndex];
+                  const colorSetIndex = getStreetIndex(board, propertyId);
+                  if (colorSetIndex === -1) return false;
+                  const price = settings.houses.pricePerColorSet[colorSetIndex];
                   if (player.balance < price) return false;
                   store.update(currentState => {
                         if (!currentState) return currentState;
@@ -393,8 +394,9 @@ export const engine = function () {
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
                   if (!street || street.amountOfHouses <= 0) return false;
-                  const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
-                  const price = settings.priceStreets.flatMap(s => s)[fieldTypeIndex] / 2;
+                  const colorSetIndex = getStreetIndex(board, propertyId);
+                  if (colorSetIndex === -1) return false;
+                  const price = (settings.houses.pricePerColorSet[colorSetIndex] * settings.houses.sellPricePercentage) / 100;
                   store.update(currentState => {
                         if (!currentState) return currentState;
                         currentState = setPlayerBalance(currentState, playerId, price);

@@ -1,4 +1,19 @@
+import { FieldType } from "$lib";
 import { writable } from "svelte/store";
+
+export function getThemePropertiesKey(
+      type: FieldType,
+): keyof App.Data.Theme.Model['properties'] & ("streets" | "railroads" | "utilities") {
+      switch (type) {
+            case FieldType.Street:
+                  return 'streets';
+            case FieldType.Railroad:
+                  return 'railroads';
+            case FieldType.Utility:
+                  return 'utilities';
+      }
+      return "utilities";
+}
 
 export const themes: App.Data.Theme.Model[] = [
       {

@@ -12,15 +12,12 @@
 	let utility: App.Data.Theme.Utility | undefined = $derived(
 		$theme.properties.utilities[typeIndex]
 	);
-	let price: number | undefined = $derived(engine.settings.priceUtilities[typeIndex]);
 </script>
 
 {#if utility?.image}
 	<img src={utility.image} alt={utility.name} />
 {/if}
-<div class="details" title={JSON.stringify({ index, typeIndex, utility, price }, null, 4)}>
+<div class="details" title={JSON.stringify({ index, typeIndex, utility }, null, 4)}>
 	<p>{utility?.name}</p>
-	{#if engine.settings.priceStreets}
-		<p>{$theme.currency}{price}</p>
-	{/if}
+	<p>{$theme.currency}{engine.settings.utilities.price}</p>
 </div>

@@ -1,0 +1,93 @@
+@reference "$lib/../app.css";
+
+#board-wrapper {
+	@apply p-8;
+}
+
+#board {
+	@apply m-auto grid aspect-square h-[1080px] w-[1080px] border-[2px];
+	grid-template-columns: 3fr repeat(9, 2fr) 3fr;
+	grid-template-rows: 3fr repeat(9, 2fr) 3fr;
+	grid-template-areas:
+		'f1  f2  f3  f4  f5  f6  f7  f8  f9 f10 f11'
+		'f40  .   .   .   .   .   .   .   .   .  f12'
+		'f39  .  f41  .   .   .   .   .   .   .  f13'
+		'f38  .   .   .   .   .   .   .   .   .  f14'
+		'f37  .   .   .   .   .   .   .   .   .  f15'
+		'f36  .   .   .   .  f43  .   .   .   .  f16'
+		'f35  .   .   .   .   .   .   .   .   .  f17'
+		'f34  .   .   .   .   .   .   .   .   .  f18'
+		'f33  .   .   .   .   .   .   .  f42  .  f19'
+		'f32  .   .   .   .   .   .   .   .   .  f20'
+		'f31 f30 f29 f28 f27 f26 f25 f24 f23 f22 f21';
+
+	& > #boundary {
+		@apply absolute z-0 h-[calc(18_/_24_*_1080px)] w-[calc(18_/_24_*_1080px)] place-self-center self-center;
+	}
+
+	& > .figure {
+		@apply absolute size-8 rounded-full border-[4px] border-white shadow-lg transition-all;
+	}
+
+	& > .deck {
+		@apply relative z-10 flex -rotate-45 items-center justify-center;
+		& > div {
+			@apply absolute flex h-[160px] w-[240px] items-center justify-center rounded-lg;
+			& > div {
+				@apply absolute flex h-full w-full flex-col items-center justify-center rounded-lg border-[10px] border-white bg-gray-300 shadow-md;
+				&:nth-child(1) {
+					@apply -rotate-9 border-[#dfdfdf];
+				}
+				&:nth-child(2) {
+					@apply -rotate-6 border-[#efefef];
+				}
+				&:nth-child(3) {
+					@apply -rotate-3 border-[#f0f0f0];
+				}
+				& > img {
+					@apply h-1/2 w-1/2;
+				}
+				& > p {
+					@apply text-[15px] font-bold text-white uppercase;
+				}
+			}
+		}
+		& + .deck > div > div {
+			&:nth-child(1) {
+				@apply rotate-9;
+			}
+			&:nth-child(2) {
+				@apply rotate-6;
+			}
+			&:nth-child(3) {
+				@apply rotate-3;
+			}
+		}
+		&.chance > div {
+			@apply top-[50px];
+		}
+		&.community-chest > div {
+			@apply bottom-[50px];
+		}
+	}
+
+	& > #branding {
+		@apply relative flex origin-center -rotate-45 items-center justify-center;
+		& > div {
+			@apply pointer-events-none absolute flex w-screen flex-col items-center justify-center text-center;
+			& > img {
+				@apply relative mt-[-117px] mb-[-33px] h-[150px] w-[150px];
+			}
+			& > h1 {
+				@apply text-[500%] leading-none font-bold uppercase;
+			}
+			& > p {
+				@apply top-1/4 text-sm leading-none font-semibold whitespace-nowrap;
+			}
+		}
+	}
+}
+
+.floating-property-card {
+	@apply h-[512px] w-[320px];
+}

@@ -1,13 +1,20 @@
 <script lang="ts">
 	import { boardConfigs, FieldType, getFieldIndexOnSide, getSideIndex } from '$lib';
 	import { engine, getFieldTypeIndex } from '$lib/engine';
-	import { theme, themes } from '$lib/theme';
+	import { getThemePropertiesKey, theme, themes } from '$lib/theme';
 	import { get } from 'svelte/store';
 	import Select from '../general/Select.svelte';
 	import Figure from './Figure.svelte';
 	import GameField from './GameField.svelte';
 	import Floating from '../general/Floating.svelte';
-	import type { Placement } from '@floating-ui/dom';
+	import {
+		detectOverflow,
+		type Middleware,
+		type MiddlewareReturn,
+		type Placement
+	} from '@floating-ui/dom';
+	import './board.css';
+	import PropertyCard from './PropertyCard.svelte';
 
 	let fields = $state(
 		engine.board.fieldTypeOrder.map((type, fieldIndex) => ({
@@ -26,44 +33,23 @@
 			return;
 		}
 		currentFieldId = `${type}-${typeIndex}`;
-		const fieldIndexSide = getFieldIndexOnSide(engine.board, fieldIndex);
-		const lengthX = engine.board.lengthX;
-		const lengthY = (engine.board.fieldTypeOrder.length - 2 * lengthX) / 2;
 		const sideIndex = getSideIndex(engine.board, fieldIndex);
-		const sideMap = [
-			{ name: 'bottom', length: lengthX, start: '-start', end: '-end' },
-			{ name: 'left', length: lengthY, start: '-start', end: '-end' },
-			{ name: 'top', length: lengthX, start: '-end', end: '-start' },
-			{ name: 'right', length: lengthY, start: '-end', end: '-start' }
-		] satisfies {
-			name: Placement;
-			length: number;
-			start: string;
-			end: string;
-		}[];
-
-		const side = sideMap[sideIndex];
-		currentPlacement = side.name;
-
-		if (fieldIndexSide === 1) {
-			currentPlacement += side.start;
-		} else if (fieldIndexSide === side.length - 1) {
-			currentPlacement += side.end;
-		}
+		const sideMap = ['bottom', 'left', 'top', 'right'] satisfies Placement[];
+		currentPlacement = sideMap[sideIndex];
 		fieldMenuVisible = true;
 	}
 </script>
 
 <Floating
 	referenceId={currentFieldId}
+	boundaryId="boundary"
 	bind:visible={fieldMenuVisible}
 	placement={currentPlacement}
 	closable
-	class="h-72 w-48"
+	class="floating-property-card"
 >
 	{#snippet children()}
-		<p>{currentFieldId}</p>
-		<p>{currentPlacement}</p>
+		<PropertyCard id={currentFieldId} />
 	{/snippet}
 </Floating>
 
@@ -88,6 +74,7 @@
 				onclick={() => openFieldMenu(field.fieldIndex, field.typeIndex, field.type)}
 			/>
 		{/each}
+		<div id="boundary"></div>
 		{#each $engine.players as player (player.id)}
 			<Figure {...player} />
 		{/each}

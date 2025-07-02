@@ -11,15 +11,12 @@
 	let railroad: App.Data.Theme.Railroad | undefined = $derived(
 		$theme.properties.railroads[typeIndex]
 	);
-	let price: number | undefined = $derived(engine.settings.priceRailroads[typeIndex]);
 </script>
 
 {#if railroad?.image}
 	<img src={railroad.image} alt={railroad.name} />
 {/if}
-<div class="details" title={JSON.stringify({ index, typeIndex, railroad, price }, null, 4)}>
+<div class="details" title={JSON.stringify({ index, typeIndex, railroad }, null, 4)}>
 	<p>{railroad?.name}</p>
-	{#if price}
-		<p>{$theme.currency}{price}</p>
-	{/if}
+	<p>{$theme.currency}{engine.settings.railroads.price}</p>
 </div>
