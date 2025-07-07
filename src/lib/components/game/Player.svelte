@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { colors, FieldType, getStreetIndex } from '$lib';
+	import { colors, FieldType, getStreetColorSetIndex } from '$lib';
 	import { engine, getFieldTypeIndex } from '$lib/engine';
 	import { p2p } from '$lib/p2p';
 	import { theme } from '$lib/theme';
@@ -62,7 +62,9 @@
 		{#each $engine.streets.filter((p) => p.ownerId === player.id) as street (street.id)}
 			<div
 				class="street"
-				style="background-color: {$theme.colors.streets[getStreetIndex(engine.board, street.id)]};"
+				style="background-color: {$theme.colors.streets[
+					getStreetColorSetIndex(engine.board, street.id)
+				]};"
 			>
 				{$theme.properties.streets[Number(street.id.split('-')[1])].name}
 			</div>

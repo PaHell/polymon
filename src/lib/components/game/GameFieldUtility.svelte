@@ -21,3 +21,4 @@
 	<p>{utility?.name}</p>
 	<p>{$theme.currency}{engine.settings.utilities.price}</p>
 </div>
+<div class="owner"></div>

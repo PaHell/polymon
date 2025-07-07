@@ -89,5 +89,5 @@
 }
 
 .floating-property-card {
-	@apply h-[512px] w-[320px];
+	@apply w-[320px];
 }

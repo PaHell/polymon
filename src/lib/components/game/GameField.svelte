@@ -7,7 +7,7 @@
 	import GameFieldStreet from './GameFieldStreet.svelte';
 	import GameFieldRailroad from './GameFieldRailroad.svelte';
 	import GameFieldUtility from './GameFieldUtility.svelte';
-	import { engine } from '$lib/engine';
+	import { engine, getPropertyOwner } from '$lib/engine';
 	import { get } from 'svelte/store';
 	import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 
@@ -21,6 +21,9 @@
 		typeIndex: number;
 		type: FieldType;
 	} = $props();
+
+	let ownerId = $derived(getPropertyOwner($engine, type + '-' + typeIndex));
+	let color = $derived($engine.players.find((p) => p.id === ownerId)?.color);
 </script>
 
 <button

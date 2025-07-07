@@ -47,6 +47,10 @@ export const themes: App.Data.Theme.Model[] = [
                         "#00008b", // dark-blue
                   ],
             },
+            images: {
+                  house: "/themes/default/house.svg",
+                  hotel: "/themes/default/hotel.svg"
+            },
             properties: {
                   utilities: [
                         { name: "Electric Company", image: "/themes/default/electric-company.svg", background: "" },
@@ -135,6 +139,10 @@ export const themes: App.Data.Theme.Model[] = [
                         "#85bb65", // Green (prime real estate)
                         "#1a1a1a"  // Black (shadow finance)
                   ]
+            },
+            images: {
+                  house: "/themes/default/house.svg",
+                  hotel: "/themes/default/hotel.svg"
             },
             properties: {
                   utilities: [

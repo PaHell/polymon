@@ -44,7 +44,7 @@ export const boardConfigs: App.Data.Game.BoardConfig[] = [
             id: "default",
             name: "Classic",
             lengthX: 10,
-            streetLengths: [
+            colorSetLengths: [
                   2, // brown
                   3, // lightBlue
                   3, // pink
@@ -147,12 +147,12 @@ export const fieldTypeClassMap: Record<FieldType, string> = {
       [FieldType.LuxuryTax]: "luxury-tax",
 };
 
-export function getStreetIndex(board: App.Data.Game.BoardConfig, streetId: App.Data.GameState.Street["id"]): number {
+export function getStreetColorSetIndex(board: App.Data.Game.BoardConfig, streetId: App.Data.GameState.Street["id"]): number {
       const index = Number(streetId.split("-")[1]);
       let count = 0;
 
-      for (let i = 0; i < board.streetLengths.length; i++) {
-            count += board.streetLengths[i];
+      for (let i = 0; i < board.colorSetLengths.length; i++) {
+            count += board.colorSetLengths[i];
             if (index < count) {
                   return i;
             }
@@ -195,7 +195,7 @@ export const defaultGameSettings: App.Data.Game.Settings = {
       maxTurnsInJail: 3,
       throwsPerTurnInJail: 3,
       jailExitPrice: 50,
-      ownedColorSetRentMultiplier: 200,
+      ownedColorSetRentMultiplier: 2,
       streets: [
             {
                   price: 60,
@@ -355,7 +355,7 @@ export const defaultGameSettings: App.Data.Game.Settings = {
             sellPricePercentage: 50,
       },
       hotels: {
-            pricePerStreet: [
+            pricePerColorSet: [
                   50, // brown
                   50, // lightBlue
                   100, // pink

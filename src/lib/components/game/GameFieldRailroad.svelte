@@ -20,3 +20,4 @@
 	<p>{railroad?.name}</p>
 	<p>{$theme.currency}{engine.settings.railroads.price}</p>
 </div>
+<div class="owner"></div>

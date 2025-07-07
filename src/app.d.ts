@@ -23,7 +23,7 @@ declare global {
 					id: string;
 					name: string;
 					lengthX: number;
-					streetLengths: number[];
+					colorSetLengths: number[];
 					fieldTypeOrder: FieldType[];
 				};
 				type Settings = {
@@ -58,7 +58,7 @@ declare global {
 						sellPricePercentage: number;
 					};
 					hotels: {
-						pricePerStreet: number[];
+						pricePerColorSet: number[];
 						housesRequired: number;
 						totalAmount: number;
 						sellPricePercentage: number;
@@ -240,6 +240,10 @@ declare global {
 							string, // green
 							string  // dark-blue
 						];
+					};
+					images: {
+						house: string;
+						hotel: string;
 					};
 					properties: {
 						utilities: Utility[];

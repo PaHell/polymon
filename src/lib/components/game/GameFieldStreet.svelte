@@ -19,3 +19,4 @@
 	<p>{street?.name}</p>
 	<p>{$theme.currency}{engine.settings.streets[typeIndex].price}</p>
 </div>
+<div class="owner"></div>

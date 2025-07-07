@@ -1,9 +1,12 @@
 @reference "$lib/../app.css";
 
 .game-field {
-	@apply flex h-full w-full overflow-hidden border-inherit text-center text-[10px] font-bold uppercase;
+	@apply relative flex h-full w-full border-inherit text-center text-[10px] font-bold uppercase;
 	&.field-layout-0 {
 		@apply flex-col-reverse border-e-[2px] border-b-[2px];
+		& > .owner {
+			margin-top: calc(-32px - 2px);
+		}
 		& > .buildings {
 			@apply border-t-[2px];
 		}
@@ -13,6 +16,9 @@
 	}
 	&.field-layout-1 {
 		@apply flex-row border-s-[2px] border-b-[2px];
+		& > .owner {
+			margin-right: calc(-32px - 2px);
+		}
 		& > .buildings {
 			@apply border-e-[2px];
 		}
@@ -22,6 +28,9 @@
 	}
 	&.field-layout-2 {
 		@apply flex-col border-s-[2px] border-t-[2px];
+		& > .owner {
+			margin-bottom: calc(-32px - 2px);
+		}
 		& > .buildings {
 			@apply border-b-[2px];
 		}
@@ -31,6 +40,9 @@
 	}
 	&.field-layout-3 {
 		@apply flex-row-reverse border-e-[2px] border-t-[2px];
+		& > .owner {
+			margin-left: calc(-32px - 2px);
+		}
 		& > .buildings {
 			@apply border-s-[2px];
 		}
@@ -40,12 +52,14 @@
 	}
 	&.field-layout-0,
 	&.field-layout-2 {
+		& > .owner,
 		& > .buildings {
 			@apply h-[32px];
 		}
 	}
 	&.field-layout-1,
 	&.field-layout-3 {
+		& > .owner,
 		& > .buildings {
 			@apply w-[32px];
 		}
@@ -61,6 +75,9 @@
 	}
 	&:nth-child(40) {
 		@apply border-t-0;
+	}
+	& > .owner {
+		@apply bg-red-500;
 	}
 	&.utility,
 	&.railroad {

@@ -1,0 +1,19 @@
+.rent-cost-list {
+	@apply grid grid-cols-[auto_auto_1fr] gap-x-[2px] gap-y-[4px];
+	& > * {
+		@apply truncate;
+		&:nth-child(3n) {
+			@apply text-end;
+		}
+	}
+}
+
+.building-cost-list {
+	@apply grid grid-cols-[auto_1fr] gap-x-[2px] gap-y-[4px];
+	& > * {
+		@apply truncate;
+		&:nth-child(even) {
+			@apply text-end;
+		}
+	}
+}

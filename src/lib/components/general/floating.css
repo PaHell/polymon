@@ -19,7 +19,7 @@
 	}
 	& > .floating-content {
 		@apply relative m-[16px] rounded-lg border-[2px] border-black bg-gray-50 p-[8px] text-black shadow-lg;
-		& > .button {
+		& > .button:first-child {
 			@apply absolute top-1 right-1;
 		}
 	}
