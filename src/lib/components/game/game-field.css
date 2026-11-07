@@ -5,61 +5,68 @@
 	&.field-layout-0 {
 		@apply flex-col-reverse border-e-[2px] border-b-[2px];
 		& > .owner {
-			margin-top: calc(-32px - 2px);
+			margin-top: calc(-8px - 2px);
 		}
 		& > .buildings {
 			@apply border-t-[2px];
 		}
 		& > img {
-			@apply mt-2;
+			@apply mt-[4px];
 		}
 	}
 	&.field-layout-1 {
 		@apply flex-row border-s-[2px] border-b-[2px];
 		& > .owner {
-			margin-right: calc(-32px - 2px);
+			margin-right: calc(-8px - 2px);
+			& > img {
+				@apply rotate-90;
+			}
 		}
 		& > .buildings {
 			@apply border-e-[2px];
-		}
-		& > img {
-			@apply me-1;
 		}
 	}
 	&.field-layout-2 {
 		@apply flex-col border-s-[2px] border-t-[2px];
 		& > .owner {
-			margin-bottom: calc(-32px - 2px);
+			margin-bottom: calc(-8px - 2px);
+			& > img {
+				@apply rotate-180;
+			}
 		}
 		& > .buildings {
 			@apply border-b-[2px];
 		}
 		& > img {
-			@apply mb-2;
+			@apply mb-[4px];
 		}
 	}
 	&.field-layout-3 {
 		@apply flex-row-reverse border-e-[2px] border-t-[2px];
 		& > .owner {
-			margin-left: calc(-32px - 2px);
+			margin-left: calc(-8px - 2px);
+			& > img {
+				@apply -rotate-90;
+			}
 		}
 		& > .buildings {
 			@apply border-s-[2px];
 		}
-		& > img {
-			@apply ms-1;
-		}
 	}
 	&.field-layout-0,
 	&.field-layout-2 {
-		& > .owner,
+		& > .owner {
+			@apply h-[8px];
+		}
 		& > .buildings {
 			@apply h-[32px];
 		}
 	}
 	&.field-layout-1,
 	&.field-layout-3 {
-		& > .owner,
+		& > .owner {
+			@apply w-[8px];
+		}
 		& > .buildings {
 			@apply w-[32px];
 		}
@@ -77,21 +84,30 @@
 		@apply border-t-0;
 	}
 	& > .owner {
-		@apply bg-red-500;
+		@apply flex items-center justify-center;
+		& > div {
+			@apply h-[8px] w-[64px] rounded-t-full border-x-[2px] border-t-[2px] border-black;
+		}
 	}
 	&.utility,
 	&.railroad {
 		&.field-layout-0 {
-			@apply pb-2;
+			@apply pb-[8px];
 		}
 		&.field-layout-1 {
-			@apply pe-2;
+			@apply pe-[8px];
+			& > .owner {
+				@apply mr-[-42px];
+			}
 		}
 		&.field-layout-2 {
-			@apply pt-2;
+			@apply pt-[8px];
 		}
 		&.field-layout-3 {
-			@apply ps-2;
+			@apply ps-[8px];
+			& > .owner {
+				@apply ml-[-42px];
+			}
 		}
 	}
 	&.chance,
@@ -163,6 +179,6 @@
 		@apply w-[50px] self-center;
 	}
 	& > .details {
-		@apply flex flex-1 flex-col justify-between py-2;
+		@apply flex flex-1 flex-col justify-between p-[8px];
 	}
 }

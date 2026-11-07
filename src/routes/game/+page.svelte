@@ -38,7 +38,7 @@
 					{
 						id: 'remote-player-3',
 						seed: 'remote-player-3',
-						color: PlayerColor.Yellow,
+						color: PlayerColor.Orange,
 						isReady: true
 					}
 				],
@@ -58,10 +58,29 @@
 				throw new Error(`Failed to initialize the game engine: ${error}`);
 			});
 	}
+
+	function onMortage(propertyId: App.Data.GameState.Street['id']) {
+		engine.mortgageProperty($engine.currentPlayerId, propertyId);
+	}
+	function onPayMortage(propertyId: App.Data.GameState.Street['id']) {
+		engine.unmortgageProperty($engine.currentPlayerId, propertyId);
+	}
+	function onBuyHouse(propertyId: App.Data.GameState.Street['id']) {
+		engine.buyHouseForProperty($engine.currentPlayerId, propertyId);
+	}
+	function onSellHouse(propertyId: App.Data.GameState.Street['id']) {
+		engine.sellHouseForProperty($engine.currentPlayerId, propertyId);
+	}
+	function onBuyHotel(propertyId: App.Data.GameState.Street['id']) {
+		engine.buyHotelForProperty($engine.currentPlayerId, propertyId);
+	}
+	function onSellHotel(propertyId: App.Data.GameState.Street['id']) {
+		engine.sellHotelForProperty($engine.currentPlayerId, propertyId);
+	}
 </script>
 
 {#if $engine}
-	<Board />
+	<Board {onMortage} {onPayMortage} {onBuyHouse} {onSellHouse} {onBuyHotel} {onSellHotel} />
 	<PlayersOverlay />
 	<StateOverlay />
 {/if}

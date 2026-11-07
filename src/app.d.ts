@@ -101,7 +101,7 @@ declare global {
 				type Utility = Railroad;
 				type Street = Railroad & {
 					amountOfHouses: number;
-					hasHotel: boolean;
+					amountOfHotels: number;
 				}
 				type Model = {
 					turnCount: number;

@@ -6,6 +6,7 @@
 	import { theme, themes } from '$lib/theme';
 	import { engine, getFieldTypeIndex } from '$lib/engine';
 	import { util } from 'peerjs';
+	import FieldOwnerDisplay from './FieldOwnerDisplay.svelte';
 
 	let { index, typeIndex }: { index: number; typeIndex: number } = $props();
 
@@ -21,4 +22,4 @@
 	<p>{utility?.name}</p>
 	<p>{$theme.currency}{engine.settings.utilities.price}</p>
 </div>
-<div class="owner"></div>
+<FieldOwnerDisplay type={FieldType.Utility} {typeIndex} />

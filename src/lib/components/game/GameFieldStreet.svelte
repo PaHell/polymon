@@ -1,10 +1,11 @@
 <script lang="ts">
 	import './game-field.css';
-	import { FieldType, fieldTypeClassMap } from '$lib';
+	import { colors, FieldType, fieldTypeClassMap } from '$lib';
 	import GameFieldImage from './GameFieldImage.svelte';
 	import Icon from '../general/Icon.svelte';
 	import { theme } from '$lib/theme';
-	import { engine, getFieldTypeIndex } from '$lib/engine';
+	import { engine, getFieldTypeIndex, getPropertyOwner } from '$lib/engine';
+	import FieldOwnerDisplay from './FieldOwnerDisplay.svelte';
 
 	let { index, typeIndex }: { index: number; typeIndex: number } = $props();
 
@@ -19,4 +20,4 @@
 	<p>{street?.name}</p>
 	<p>{$theme.currency}{engine.settings.streets[typeIndex].price}</p>
 </div>
-<div class="owner"></div>
+<FieldOwnerDisplay type={FieldType.Street} {typeIndex} />

@@ -394,22 +394,20 @@ export const botNames: App.Data.Game.Bot["name"][] = [
 ];
 
 export enum PlayerColor {
-      Red,
-      Blue,
-      Green,
-      Yellow,
-      Orange,
-      Purple,
-      Brown,
-      Pink,
-      Gray
+      Red = "red",
+      Blue = "blue",
+      Green = "green",
+      Orange = "orange",
+      Purple = "purple",
+      Brown = "brown",
+      Pink = "pink",
+      Gray = "gray",
 }
 
 export const colors: Record<PlayerColor, string> = {
       [PlayerColor.Red]: "#FF0000",
       [PlayerColor.Blue]: "#0000FF",
       [PlayerColor.Green]: "#00FF00",
-      [PlayerColor.Yellow]: "#FFFF00",
       [PlayerColor.Orange]: "#FFA500",
       [PlayerColor.Purple]: "#800080",
       [PlayerColor.Brown]: "#A52A2A",

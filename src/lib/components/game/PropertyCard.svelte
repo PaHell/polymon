@@ -7,11 +7,14 @@
 	import './property-card.css';
 	import Button from '../general/Button.svelte';
 	import { p2p } from '$lib/p2p';
+	import type { Snippet } from 'svelte';
 
 	let {
-		id
+		id,
+		actions
 	}: {
 		id: App.Data.GameState.Street['id'];
+		actions: Snippet<[]>;
 	} = $props();
 
 	let ownerId: App.Data.GameState.Street['ownerId'] | null = $state();
@@ -119,12 +122,7 @@
 		</div>
 		<hr class="border-t-[2px] border-black" />
 		<div class="flex flex-wrap gap-4 pt-2">
-			<Button>Mortage</Button>
-			<Button>Pay Mortage</Button>
-			<Button>Buy House</Button>
-			<Button>Sell House</Button>
-			<Button>Buy Hotel</Button>
-			<Button>Sell Hotel</Button>
+			{@render actions()}
 		</div>
 	{/if}
 {:else if railroad}

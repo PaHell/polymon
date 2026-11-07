@@ -9,4 +9,8 @@
 	&.button-secondary {
 		@apply bg-white/10 text-white hover:bg-white/20 focus:outline-none;
 	}
+
+	&:disabled {
+		@apply cursor-not-allowed opacity-50;
+	}
 }

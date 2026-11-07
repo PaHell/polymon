@@ -59,7 +59,7 @@ function stringifyGameState(obj: App.Data.GameState.Model): string {
                   street.isMortgaged + "," +
                   street.ownerId + "," +
                   street.amountOfHouses + "," +
-                  street.hasHotel
+                  street.amountOfHotels
             ).join(";");
 }
 
@@ -186,7 +186,7 @@ function setPropertyOwner(state: App.Data.GameState.Model, propertyId: App.Data.
                         isMortgaged: false,
                         ownerId: playerId,
                         amountOfHouses: 0,
-                        hasHotel: false,
+                        amountOfHotels: 0,
                   });
                   break;
             case FieldType.Railroad:
@@ -205,6 +205,32 @@ function setPropertyOwner(state: App.Data.GameState.Model, propertyId: App.Data.
                   break;
       }
       return state;
+}
+
+export function playerOwnsColorSet(
+      state: App.Data.GameState.Model,
+      config: App.Data.Game.BoardConfig,
+      playerId: App.Data.GameState.Player["id"],
+      colorSetIndex: number
+): boolean {
+      const ownedStreets = state.streets.filter(
+            s => s.ownerId === playerId && getStreetColorSetIndex(config, s.id) === colorSetIndex
+      );
+      return ownedStreets.length === config.colorSetLengths[colorSetIndex];
+}
+
+export function getOwnedColorSetIndicesForPlayer(state: App.Data.GameState.Model, config: App.Data.Game.BoardConfig, playerId: App.Data.GameState.Player["id"]): number[] {
+      const ownedColorSetIndices = state.streets
+            .filter(s => s.ownerId === playerId)
+            .map(s => getStreetColorSetIndex(config, s.id));
+      const colorSets: number[] = [];
+      for (let i = 0; i < config.colorSetLengths.length; i++) {
+            const length = config.colorSetLengths[i];
+            if (ownedColorSetIndices.filter(index => index === i).length === length) {
+                  colorSets.push(i);
+            }
+      }
+      return colorSets;
 }
 
 export const engine = function () {
@@ -352,7 +378,7 @@ export const engine = function () {
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
-                  if (!street || street.hasHotel || street.amountOfHouses >= settings.hotels.housesRequired) return false;
+                  if (!street || street.amountOfHotels || street.amountOfHouses >= settings.hotels.housesRequired) return false;
                   const colorSetIndex = getStreetColorSetIndex(board, propertyId);
                   if (colorSetIndex === -1) return false;
                   const price = settings.houses.pricePerColorSet[colorSetIndex];
@@ -373,14 +399,14 @@ export const engine = function () {
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
-                  if (!street || street.hasHotel || street.amountOfHouses !== settings.hotels.housesRequired) return false;
+                  if (!street || street.amountOfHotels || street.amountOfHouses !== settings.hotels.housesRequired) return false;
                   const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
                   const price = settings.hotels.pricePerColorSet.flatMap(s => s)[fieldTypeIndex];
                   if (player.balance < price) return false;
                   store.update(currentState => {
                         if (!currentState) return currentState;
                         currentState = setPlayerBalance(currentState, playerId, -price);
-                        currentState.streets.find(s => s.id === propertyId)!.hasHotel = true;
+                        currentState.streets.find(s => s.id === propertyId)!.amountOfHotels += 1;
                         currentState.streets.find(s => s.id === propertyId)!.amountOfHouses = 0;
                         return currentState;
                   });
@@ -412,13 +438,13 @@ export const engine = function () {
                   const propertyOwner = getPropertyOwner(state, propertyId);
                   if (propertyOwner !== playerId) return false;
                   const street = state.streets.find(s => s.id === propertyId);
-                  if (!street || !street.hasHotel) return false;
+                  if (!street || !street.amountOfHotels) return false;
                   const fieldTypeIndex = getFieldTypeIndex(board, FieldType.Street, Number(street.id.split("-")[1]));
                   const price = settings.hotels.pricePerColorSet.flatMap(s => s)[fieldTypeIndex] / 2;
                   store.update(currentState => {
                         if (!currentState) return currentState;
                         currentState = setPlayerBalance(currentState, playerId, price);
-                        currentState.streets.find(s => s.id === propertyId)!.hasHotel = false;
+                        currentState.streets.find(s => s.id === propertyId)!.amountOfHotels -= 1;
                         currentState.streets.find(s => s.id === propertyId)!.amountOfHouses = settings.hotels.housesRequired;
                         return currentState;
                   });
@@ -446,6 +472,7 @@ export const engine = function () {
                   return loan;
             },
             unmortgageProperty: (playerId: App.Data.GameState.Player["id"], propertyId: App.Data.GameState.Railroad["id"]): boolean => {
+                  console.log("Unmortgage Property for player:", playerId, "Property ID:", propertyId);
                   const state = get(store);
                   if (!isPlayerAtTurn(state, playerId)) return false;
                   if (!getLegalMoves(state).includes(GameEventType.UnmortgageProperty)) return false;
@@ -453,10 +480,12 @@ export const engine = function () {
                   if (propertyOwner !== playerId) return false;
                   const property = [...state.streets, ...state.railroads, ...state.utilities].find(s => s.id === propertyId);
                   if (!property || !property.isMortgaged) return false;
+                  console.log("Property is mortgaged, proceeding with unmortgage");
                   const fieldTypeIndex = getFieldTypeIndex(board, property.id.split("-")[0] as FieldType, Number(property.id.split("-")[1]));
                   const loan = Math.round((getFieldPrice(settings, property.id.split("-")[0] as FieldType, fieldTypeIndex) * settings.mortgage.loanPercentage) / 100);
                   const interest = Math.round((loan * settings.mortgage.interestRatePercentage) / 100);
                   const totalPayment = loan + interest;
+                  console.log("Total payment for unmortgage:", totalPayment);
                   if (state.players.find(p => p.id === playerId)!.balance < totalPayment) return false;
                   store.update(currentState => {
                         if (!currentState) return currentState;
